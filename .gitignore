@@ -1,0 +1,14 @@
+node_modules/
+dist/
+data/
+backups/
+.env
+.env.*
+!.env.example
+*.log
+.finbiz-*/
+*.db
+*.db-shm
+*.db-wal
+tmp/
+test-results/

@@ -1,0 +1,175 @@
+/* Selective KPI / feature cards retain their assigned component colour. */
+.effect-card.effect-card {
+  --card-title-color: var(--ink);
+  --card-description-color: var(--muted);
+  position: relative;
+  isolation: isolate;
+  z-index: 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--card-radius, 16px);
+  border: 1px solid color-mix(in srgb, var(--tone) 22%, white);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--tone-bg) 45%, white),
+    var(--tone-bg)
+  );
+  color: var(--card-title-color);
+  text-decoration: none;
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 200ms var(--ease-out, ease-out),
+    box-shadow 200ms var(--ease-out, ease-out),
+    border-color 200ms var(--ease-out, ease-out);
+}
+.effect-card.effect-card > * {
+  position: relative;
+  z-index: 1;
+}
+.effect-card.effect-card::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, var(--tone-deep), var(--tone));
+  clip-path: circle(16px at calc(100% + 18px) -18px);
+  transition: clip-path 380ms var(--ease-out, ease-out);
+  pointer-events: none;
+}
+.effect-card.effect-card::after {
+  content: "\2197";
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding-left: 4px;
+  padding-bottom: 4px;
+  background: linear-gradient(135deg, var(--tone), var(--tone-deep));
+  border-radius: 0 14px 0 28px;
+  color: white;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+.effect-card.effect-card
+  :is(
+    h1,
+    h2,
+    h3,
+    .card-title,
+    .stat-title,
+    .stat-value,
+    .large-amount,
+    .metric-copy > strong,
+    .user-summary strong
+  ) {
+  color: var(--card-title-color);
+  transition: color 380ms var(--ease-out, ease-out);
+}
+.effect-card.effect-card
+  :is(
+    p,
+    .small-desc,
+    .muted,
+    .stat-foot,
+    .stat-label,
+    .metric-note,
+    .card-title-copy > p,
+    .user-summary small,
+    .activity-empty,
+    .workspace-breadcrumb
+  ) {
+  color: var(--card-description-color);
+  transition: color 380ms var(--ease-out, ease-out);
+}
+.effect-card.effect-card
+  :is(
+    .form-grid > label,
+    .group-proposal-form > label,
+    .category-list > div,
+    .field-label
+  ) {
+  color: var(--card-title-color);
+}
+.effect-card.effect-card :is(.panel-header, .reference-panel-title) {
+  padding-right: 22px;
+}
+.effect-card.effect-card .stat-label {
+  padding-right: 16px;
+}
+.effect-card.account-card > .badge {
+  right: 42px;
+}
+/* Data surfaces retain contrast while the containing card animates. */
+.effect-card
+  :is(
+    .table-scroll,
+    .record-picker,
+    .matching-summary,
+    .cash-insight,
+    .enhancement-history,
+    .panel-note,
+    .reference-quick-actions > button,
+    .input-container,
+    .error
+  ) {
+  --card-title-color: var(--ink);
+  --card-description-color: var(--muted);
+}
+.effect-card .table-scroll {
+  background: white;
+  color: var(--ink);
+}
+.effect-card :is(.record-picker, .panel-note, .financial-area-chart) {
+  background: white;
+  border-radius: 8px;
+}
+.effect-card.effect-card
+  :is(
+    .reference-legend,
+    .insight-rows > button,
+    .reference-activity-list strong
+  ) {
+  color: var(--card-title-color);
+}
+.effect-card.effect-card
+  :is(
+    .field-help,
+    .field-label small,
+    .reference-activity-list small,
+    .reference-activity-list time
+  ) {
+  color: var(--card-description-color);
+}
+.effect-card.effect-card:focus-within {
+  --card-title-color: #fff;
+  --card-description-color: #ffffffde;
+  border-color: var(--tone-deep);
+  box-shadow: var(--card-shadow-hover);
+}
+.effect-card.effect-card:focus-within::before {
+  clip-path: circle(150% at 100% 0);
+}
+@media (hover: hover) and (pointer: fine) {
+  .effect-card.effect-card:hover {
+    --card-title-color: #fff;
+    --card-description-color: #ffffffde;
+    border-color: var(--tone-deep);
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+  }
+  .effect-card.effect-card:hover::before {
+    clip-path: circle(150% at 100% 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .effect-card.effect-card::before,
+  .effect-card.effect-card :is(h1, h2, h3, p, span, strong) {
+    transition: none;
+  }
+}

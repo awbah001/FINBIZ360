@@ -1,0 +1,177 @@
+/* Adapted from Uiverse.io by TechByElijah. Fields retain responsive widths,
+   the existing palette and a visible keyboard focus indicator. */
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--ink) 10%, transparent);
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.input-container:hover {
+  background: var(--surface-tint);
+}
+.input-container:focus-within {
+  background: white;
+  box-shadow: 0 4px 6px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.input-container:has(> .input:focus-visible) {
+  outline: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 3px;
+}
+.input-container > .input {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  min-height: 46px;
+  padding: 0.6em 1em;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-input);
+  line-height: 1.5;
+  box-shadow: none;
+}
+.input-container > .input:hover,
+.input-container > .input:focus,
+.input-container > .input:focus-visible {
+  outline: none;
+  background: transparent;
+  box-shadow: none;
+}
+.input-container > .input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+  font-size: var(--text-small);
+}
+.input-container > .highlight {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--brand-gradient);
+  border-radius: 0 0 6px 6px;
+  pointer-events: none;
+  transition: width 0.3s ease;
+}
+.input-container:focus-within > .highlight {
+  width: 100%;
+}
+.input-container:has(> .input:disabled) {
+  opacity: 0.6;
+  background: var(--line);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.input-container > .input:disabled {
+  cursor: not-allowed;
+}
+.input-container:has(> textarea) {
+  align-items: stretch;
+}
+.input-container > textarea.input {
+  min-height: 112px;
+  resize: vertical;
+}
+.auth-input.input-container {
+  min-height: 48px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 6px;
+}
+.auth-input.input-container:focus-within {
+  background: white;
+  box-shadow: 0 4px 6px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.auth-input.input-container > .input {
+  padding: 0.6em 0;
+  border-radius: 0;
+}
+.search-box > .input-container {
+  flex: 1;
+}
+.search-box > svg {
+  z-index: 1;
+  pointer-events: none;
+}
+.search-box .input-container > .input {
+  padding-left: 38px;
+}
+.filter-controls > .input-container {
+  width: auto;
+  max-width: 220px;
+  flex: 0 1 220px;
+}
+.filter-controls .input-container > select {
+  max-width: 100%;
+  padding-right: 24px;
+}
+.date-filter > .input-container {
+  width: 155px;
+  flex-shrink: 0;
+}
+.date-filter .input-container > .input {
+  min-width: 0;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.upload-area > .input-container {
+  max-width: 100%;
+}
+.input-container > input[type="file"] {
+  padding: 10px;
+  overflow: hidden;
+}
+.input::file-selector-button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-right: 10px;
+  color: var(--primary);
+  background: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-small);
+}
+@keyframes input-focus {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .input-container:focus-within {
+    animation: input-focus 0.3s ease;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .input-container,
+  .input-container > .highlight {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  .input-container > .input {
+    font-size: 1rem;
+  }
+  .filter-controls > .input-container {
+    flex: 1 1 180px;
+    max-width: 100%;
+  }
+}

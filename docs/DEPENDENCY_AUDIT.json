@@ -1,0 +1,24 @@
+{
+  "command": "npm audit --json",
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "dependencies": {
+      "prod": 273,
+      "dev": 159,
+      "optional": 54,
+      "peer": 8,
+      "peerOptional": 0,
+      "total": 433
+    }
+  },
+  "scope_note": "Observed registry audit of the installed dependency tree during this enhancement pass. Not a certification of application logic, deployment, operating system or unknown vulnerabilities."
+}

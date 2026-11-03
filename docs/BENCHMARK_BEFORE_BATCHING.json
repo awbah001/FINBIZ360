@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-11-01T23:01:42.715Z",
+  "conditions": {
+    "node": "v25.2.1",
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "storage": "SQLite in-memory, single process; loopback Supertest; warmed requests",
+    "statement_lines": 2000,
+    "transactions": 10056,
+    "concurrency": 1,
+    "samples_per_endpoint": 20,
+    "limitations": "Not a production, disk, network, browser-rendering, high-concurrency or long-duration benchmark. Includes 2,000 statement lines; measure organisation-specific data and concurrency before deployment."
+  },
+  "target_p95_ms": 3000,
+  "results": [
+    {
+      "endpoint": "/transactions?page=1",
+      "samples": 20,
+      "p50_ms": 4.51,
+      "p95_ms": 10.88,
+      "max_ms": 13.9
+    },
+    {
+      "endpoint": "/overview",
+      "samples": 20,
+      "p50_ms": 212.06,
+      "p95_ms": 331.43,
+      "max_ms": 358.4
+    },
+    {
+      "endpoint": "/analytics",
+      "samples": 20,
+      "p50_ms": 204.81,
+      "p95_ms": 273.65,
+      "max_ms": 346
+    },
+    {
+      "endpoint": "/reconciliation",
+      "samples": 20,
+      "p50_ms": 5087.35,
+      "p95_ms": 5403.55,
+      "max_ms": 5947.84
+    },
+    {
+      "endpoint": "/exceptions",
+      "samples": 20,
+      "p50_ms": 5446.15,
+      "p95_ms": 7036.41,
+      "max_ms": 11641.52
+    }
+  ]
+}

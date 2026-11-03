@@ -1,0 +1,170 @@
+/* FinBiz 360 design tokens — restrained teal financial workspace. */
+:root {
+  /* Brand */
+  --primary: #0d6e67;
+  --primary-hover: #0a5752;
+  --primary-soft: #e6f7f5;
+  --brand-start: #14a89a;
+  --brand-end: #0d6e67;
+  --brand-gradient: linear-gradient(
+    135deg,
+    var(--brand-start),
+    var(--brand-end)
+  );
+  --action-gradient: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--primary-hover)
+  );
+  --teal: #0d6e67;
+
+  /* Ink & neutrals */
+  --ink: #12263a;
+  --ink-strong: #0b1826;
+  --muted: #5a6d7e;
+  --muted-soft: #7a8b9a;
+  --line: #d9e4e6;
+  --line-strong: #c5d4d7;
+
+  /* Surfaces */
+  --surface-tint: #e8f6f4;
+  --surface-soft: #f5f8f9;
+  --surface-canvas: #eef3f4;
+  --surface-raised: #ffffff;
+  --surface-sidebar: #fbfcfd;
+  --accent-cyan: #d3f7f7;
+  --accent-gold: #f4d58d;
+  --accent-ice: #ebfffb;
+
+  /* Semantic */
+  --danger: #b42336;
+  --danger-soft: #fff1f2;
+  --warning: #9a6700;
+  --warning-soft: #fff8eb;
+  --success: #18794e;
+  --success-soft: #e8f6ed;
+
+  /* Fixed component accents. Labels and icons always accompany these colours. */
+  --color-blue: #245bbe;
+  --color-violet: #7442b5;
+  --color-coral: #b94732;
+  --color-cyan: #087b96;
+  --color-slate: #52627b;
+  --tone: var(--primary);
+  --tone-deep: #084c47;
+  --tone-bg: #e5f5f1;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+
+  /* Type scale */
+  --text-xs: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-ui: 0.875rem;
+  --text-body: 0.9375rem;
+  --text-input: 0.9375rem;
+  --text-large: 1.125rem;
+  --text-title: 1.375rem;
+  --text-display: clamp(1.75rem, 2.4vw, 2rem);
+
+  /* Controls */
+  --control-height: 46px;
+  --control-compact: 36px;
+  --button-height: 40px;
+  --button-compact: 32px;
+  --radius-field: 10px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 10em;
+  --card-radius: 16px;
+  --card-padding: 24px;
+
+  /* Elevation */
+  /* Top-edge highlight, contact shadow, then a broad shadow for raised depth. */
+  --card-shadow:
+    inset 0 1px 0 #ffffffb8, 0 2px 3px #12263a0f, 0 7px 12px -4px #12263a1f,
+    0 20px 32px -14px #12263a2b;
+  --card-shadow-hover:
+    inset 0 1px 0 #ffffffb8, 0 3px 5px #12263a12, 0 12px 20px -6px #12263a26,
+    0 28px 42px -16px #12263a33;
+  --card-shadow-floating:
+    inset 0 1px 0 #ffffffcc, 0 3px 6px #12263a14, 0 14px 28px -8px #12263a26,
+    0 32px 64px -20px #12263a38;
+  --overlay-shadow: 0 24px 64px #12263a28;
+  --focus-ring: 0 0 0 3px #0d6e6724;
+
+  /* Layout */
+  --sidebar-width: 264px;
+  --content-max: 1600px;
+  --auth-max: 1120px;
+  --home-max: 1180px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 160ms;
+  --duration-med: 280ms;
+}
+
+.tone-teal {
+  --tone-on-dark: #55eed6;
+  --tone: var(--primary);
+  --tone-deep: #084c47;
+  --tone-bg: #e5f5f1;
+}
+.tone-blue {
+  --tone-on-dark: #a9caff;
+  --tone: var(--color-blue);
+  --tone-deep: #183d85;
+  --tone-bg: #eaf1ff;
+}
+.tone-cyan {
+  --tone-on-dark: #78e3f4;
+  --tone: var(--color-cyan);
+  --tone-deep: #075567;
+  --tone-bg: #e2f5fa;
+}
+.tone-green {
+  --tone-on-dark: #8ee5aa;
+  --tone: var(--success);
+  --tone-deep: #105537;
+  --tone-bg: #e8f6ed;
+}
+.tone-orange {
+  --tone-on-dark: #ffb195;
+  --tone: var(--color-coral);
+  --tone-deep: #8c3424;
+  --tone-bg: #fff0e9;
+}
+.tone-purple {
+  --tone-on-dark: #d7b6ff;
+  --tone: var(--color-violet);
+  --tone-deep: #4f2b87;
+  --tone-bg: #f1eaff;
+}
+.tone-amber {
+  --tone-on-dark: #ffda85;
+  --tone: #92600c;
+  --tone-deep: #684309;
+  --tone-bg: #fff5dc;
+}
+.tone-rose {
+  --tone-on-dark: #ffabc9;
+  --tone: #b13762;
+  --tone-deep: #802445;
+  --tone-bg: #ffedf3;
+}
+.tone-slate {
+  --tone-on-dark: #c3cedf;
+  --tone: var(--color-slate);
+  --tone-deep: #344258;
+  --tone-bg: #edf1f7;
+}

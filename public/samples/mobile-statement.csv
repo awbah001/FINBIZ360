@@ -1,0 +1,5 @@
+date,reference,amount,direction,description,currency
+2026-11-01,DEMO-00-0,1450.00,in,Retail sales receipt,SLE
+2026-10-31,DEMO-01-0,1547.00,in,Retail sales receipt,SLE
+2026-11-01,UNMATCHED-001,500.00,in,Unrecorded receipt,SLE
+invalid-date,BAD-ROW,125.00,in,Invalid date example,SLE

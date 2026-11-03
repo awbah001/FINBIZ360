@@ -1,0 +1,221 @@
+/* Hero presentation belongs here; operational panels keep their neutral surfaces. */
+.reference-workspace .module-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 190px;
+  padding: 30px 32px;
+  border: 1px solid color-mix(in srgb, var(--tone) 13%, white);
+  border-radius: 26px;
+  background:
+    var(
+      --hero-pattern,
+      linear-gradient(120deg, transparent 60%, #ffffff70 60%)
+    ),
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--tone-bg) 75%, white),
+      var(--tone-bg)
+    );
+  box-shadow: var(--card-shadow);
+  gap: 18px 26px;
+}
+.module-hero .page-heading-identity {
+  position: relative;
+  z-index: 1;
+  padding-right: 240px;
+  gap: 18px;
+}
+.module-hero .page-heading-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #ffffffb8;
+}
+.module-hero .page-heading-identity > div {
+  max-width: 600px;
+}
+.module-hero h1 {
+  font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+}
+.module-hero p {
+  color: var(--ink);
+}
+.module-hero .heading-actions {
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+.module-hero-art {
+  position: absolute;
+  z-index: 0;
+  width: 240px;
+  height: 170px;
+  right: 195px;
+  bottom: 0;
+  color: var(--tone);
+  pointer-events: none;
+}
+.module-hero:has(.heading-actions:empty) .module-hero-art {
+  right: 32px;
+}
+.hero-transactions {
+  --hero-pattern: repeating-linear-gradient(
+    135deg,
+    transparent 0 65px,
+    #ffffff40 65px 67px
+  );
+}
+.hero-invoices {
+  --hero-pattern: radial-gradient(
+    ellipse at 85% 120%,
+    #ffffffb0 0 36%,
+    transparent 36%
+  );
+}
+.hero-customers {
+  --hero-pattern: radial-gradient(
+    circle at 86% 50%,
+    #ffffff90 0 15%,
+    transparent 15% 22%,
+    #ffffff60 22% 23%,
+    transparent 23%
+  );
+}
+.hero-suppliers {
+  --hero-pattern: linear-gradient(
+    160deg,
+    transparent 65%,
+    #ffffff80 65% 80%,
+    transparent 80%
+  );
+}
+.hero-supplier-bills {
+  --hero-pattern: repeating-linear-gradient(
+    90deg,
+    transparent 0 110px,
+    #ffffff45 110px 112px
+  );
+}
+.hero-accounts {
+  --hero-pattern: radial-gradient(
+    ellipse at 85% 100%,
+    #ffffffa0 0 28%,
+    transparent 28% 38%,
+    #ffffff50 38% 40%,
+    transparent 40%
+  );
+}
+.hero-statements {
+  --hero-pattern: repeating-linear-gradient(
+    0deg,
+    transparent 0 33px,
+    #ffffff55 33px 34px
+  );
+}
+.hero-reconciliation {
+  --hero-pattern:
+    linear-gradient(
+      135deg,
+      transparent 58%,
+      #ffffff65 58% 73%,
+      transparent 73%
+    ),
+    linear-gradient(45deg, transparent 70%, #ffffff50 70%);
+}
+.hero-exceptions {
+  --hero-pattern: radial-gradient(
+    circle at 80% 50%,
+    #ffffffa0 0 20%,
+    transparent 20% 29%,
+    #ffffff50 29% 30%,
+    transparent 30%
+  );
+}
+.hero-approvals {
+  --hero-pattern: linear-gradient(
+    155deg,
+    transparent 62%,
+    #ffffff90 62% 63%,
+    transparent 63% 74%,
+    #ffffff60 74%
+  );
+}
+.hero-reports {
+  --hero-pattern: linear-gradient(
+    90deg,
+    transparent 70%,
+    #ffffff50 70% 71%,
+    transparent 71% 85%,
+    #ffffff70 85%
+  );
+}
+.hero-analytics {
+  --hero-pattern: radial-gradient(
+    ellipse at 100% 0%,
+    #ffffffa0 0 32%,
+    transparent 32% 48%,
+    #ffffff60 48% 49%,
+    transparent 49%
+  );
+}
+.reference-workspace .hero-audit-trail {
+  --hero-pattern: radial-gradient(circle, #ffffffc0 1px, transparent 1.5px);
+  background-size:
+    18px 18px,
+    auto;
+}
+.hero-profile {
+  --hero-pattern: radial-gradient(
+    ellipse at 95% 90%,
+    #ffffffa0 0 30%,
+    transparent 30% 43%,
+    #ffffff60 43% 44%,
+    transparent 44%
+  );
+}
+.hero-settings {
+  --hero-pattern:
+    repeating-linear-gradient(90deg, #ffffff30 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(0deg, #ffffff30 0 1px, transparent 1px 40px);
+}
+@media (max-width: 1400px) {
+  .reference-workspace .module-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-right: 250px;
+  }
+  .module-hero .page-heading-identity {
+    padding-right: 0;
+  }
+  .module-hero-art,
+  .module-hero:has(.heading-actions:empty) .module-hero-art {
+    right: 16px;
+  }
+}
+@media (max-width: 700px) {
+  .reference-workspace .module-hero {
+    min-height: 180px;
+    padding: 24px;
+    border-radius: 22px;
+  }
+  .module-hero .page-heading-identity {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .module-hero .page-heading-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+  }
+  .module-hero .page-heading-icon > svg {
+    width: 26px;
+    height: 26px;
+  }
+  .module-hero-art {
+    display: none;
+  }
+  .module-hero .heading-actions {
+    min-width: 0;
+  }
+}
