@@ -39,7 +39,7 @@
   box-shadow: 0 0 0 0 var(--primary-hover);
 }
 .button.danger {
-  --primary-hover: #801b29;
+  --primary-hover: #991B1B;
   border-color: var(--primary-hover);
   background: var(--danger);
   color: white;
@@ -69,7 +69,7 @@
   transform: translateY(-3px) translateX(-1px);
 }
 .button.danger:not(:disabled):hover {
-  background: #901c2b;
+  background: #B91C1C;
 }
 .button:not(:disabled):not([aria-disabled="true"]):active {
   transform: translateY(2px) translateX(1px);
@@ -140,7 +140,7 @@ a.button:is(:hover, :focus, :active) {
   font-size: var(--text-input);
 }
 .input-container:focus-within {
-  box-shadow: 0 0 0 3px #0f766e12;
+  box-shadow: 0 0 0 3px #0F766E12;
 }
 .input-container:has([aria-invalid="true"]) {
   border-color: var(--danger);
@@ -264,9 +264,9 @@ a.button:is(:hover, :focus, :active) {
 .reference-workspace .filter-bar {
   padding: 18px;
   gap: 14px;
-  border: 1px solid #ffffffd9;
+  border: 1px solid rgba(255,255,255,0.85);
   border-radius: 24px;
-  background: #ffffffb8;
+  background: rgba(255,255,255,0.72);
   box-shadow: var(--card-shadow);
   margin-bottom: 22px;
 }
@@ -293,18 +293,24 @@ a.button:is(:hover, :focus, :active) {
   margin-left: 0;
 }
 .reference-workspace .page-content .panel {
-  border-radius: 24px;
-  border-color: #dce7eb;
+  border-radius: var(--card-radius);
+  border-color: var(--line);
   box-shadow: var(--card-shadow);
 }
 .reference-workspace .panel-header {
   align-items: center;
-  padding: 20px 24px;
+  padding: var(--panel-header-padding) var(--card-padding);
 }
 .reference-workspace .panel-header .card-icon {
   width: 44px;
   height: 44px;
   border-radius: 14px;
+}
+.reference-workspace :is(.panel-header, .reference-panel-title) h2 {
+  font-size: var(--text-large);
+  font-weight: var(--panel-title-weight);
+  line-height: 1.35;
+  letter-spacing: -0.025em;
 }
 .reference-workspace .count-label {
   min-width: 28px;
@@ -316,7 +322,7 @@ a.button:is(:hover, :focus, :active) {
 }
 .reference-workspace .pagination {
   padding: 16px 24px;
-  background: #f6fafc;
+  background: var(--surface-soft);
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -365,8 +371,22 @@ a.button:is(:hover, :focus, :active) {
   max-width: 100%;
   overscroll-behavior-inline: contain;
   scrollbar-width: thin;
+  /* Subtle scroll affordance: shadows appear when content overflows horizontally. */
+  background:
+    linear-gradient(to right, var(--surface-raised, #fff) 30%, transparent),
+    linear-gradient(to left, var(--surface-raised, #fff) 30%, transparent) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgba(15, 23, 42, 0.12), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgba(15, 23, 42, 0.12), transparent) 100% 0;
+  background-repeat: no-repeat;
+  background-size:
+    40px 100%,
+    40px 100%,
+    14px 100%,
+    14px 100%;
+  background-attachment: local, local, scroll, scroll;
 }
 .table-scroll:focus-visible {
+  outline: 3px solid var(--primary);
   outline-offset: -3px;
 }
 .table-scroll table {
@@ -377,8 +397,8 @@ a.button:is(:hover, :focus, :active) {
   color: var(--muted);
 }
 .reference-workspace .table-scroll th {
-  background: #eef5fa;
-  border-block: 1px solid #dce7ef;
+  background: var(--surface-soft);
+  border-block: 1px solid var(--line);
   padding-block: 14px;
 }
 .table-scroll td {
@@ -387,11 +407,13 @@ a.button:is(:hover, :focus, :active) {
 }
 .table-scroll td .button {
   margin: 3px 4px 3px 0;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .table-scroll td:has(.invoice-actions) {
   min-width: 210px;
 }
-.table-scroll :is(td, th).money-cell {
+.table-scroll :is(td, th):is(.money-cell, .money) {
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -458,14 +480,14 @@ a.button:is(:hover, :focus, :active) {
   color: var(--tone);
 }
 .badge.recorded {
-  background: #eaf1ff;
+  background: var(--info-soft);
   color: var(--color-blue);
-  border-color: #cddbf7;
+  border-color: #BFDBFE;
 }
 .badge.in_review {
-  background: #f1eaff;
+  background: #F5F3FF;
   color: var(--color-violet);
-  border-color: #dfd0f4;
+  border-color: #DDD6FE;
 }
 .reference-workspace .sidebar-header {
   position: relative;
@@ -489,14 +511,14 @@ a.button:is(:hover, :focus, :active) {
   background: var(--surface-tint);
 }
 .auth-hero {
-  background: linear-gradient(#073b3bb8, #073b3bb8), var(--brand-gradient);
+  background: linear-gradient(rgba(10,58,55,0.72), rgba(10,58,55,0.72)), var(--brand-gradient);
 }
 .auth-logo {
   border-color: var(--line);
 }
 .auth-page {
   background:
-    radial-gradient(ellipse at 10% 15%, #14b8a61a, transparent 55%),
+    radial-gradient(ellipse at 10% 15%, rgba(20,184,166,0.10), transparent 55%),
     var(--surface-canvas);
 }
 .auth-page::before,
@@ -508,8 +530,8 @@ a.button:is(:hover, :focus, :active) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   background: var(--surface-tint);
-  border: 1px solid #b8e2da;
-  border-radius: 12px;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-md);
   padding: 18px;
   margin: 20px 0;
 }
@@ -660,10 +682,10 @@ a.button:is(:hover, :focus, :active) {
     max-width: none;
   }
   .reference-workspace .panel-header {
-    padding: 18px;
+    padding: var(--panel-header-padding) var(--card-padding);
   }
   .reference-workspace .page-content .panel {
-    border-radius: 20px;
+    border-radius: var(--card-radius);
   }
   .heading-actions {
     flex-wrap: wrap;

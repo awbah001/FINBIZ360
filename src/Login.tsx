@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
-  Mail,
-  LockKeyhole,
-  Eye,
-  EyeOff,
+  Envelope as Mail,
+  LockKey as LockKeyhole,
   ShieldCheck,
-  LoaderCircle,
-} from "lucide-react";
+  CircleNotch as LoaderCircle,
+} from "@phosphor-icons/react";
 import AuthFrame from "./AuthFrame";
+import PasswordInput from "./PasswordInput";
 
 export default function Login({
   demo,
@@ -22,7 +21,6 @@ export default function Login({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [capsLock, setCapsLock] = useState(false),
-    [showPassword, setShowPassword] = useState(false),
     [help, setHelp] = useState<"password" | "account" | null>(null);
   useEffect(() => {
     if (error) errorRef.current?.focus();
@@ -35,7 +33,7 @@ export default function Login({
         <p id="login-description">Sign in to your financial workspace.</p>
       </header>
       <form
-        className="auth-form"
+        className="auth-form finbiz-form finbiz-form-auth"
         aria-labelledby="login-title"
         aria-describedby="login-description"
         aria-busy={busy}
@@ -58,7 +56,7 @@ export default function Login({
       >
         <label htmlFor="login-email">Email address</label>
         <div className="auth-input input-container">
-          <Mail size={18} aria-hidden="true" />
+          <Mail size={18} aria-hidden="true" focusable="false" />
           <input
             className="input"
             autoFocus
@@ -79,12 +77,11 @@ export default function Login({
         </div>
         <label htmlFor="login-password">Password</label>
         <div className="auth-input input-container">
-          <LockKeyhole size={18} aria-hidden="true" />
-          <input
+          <LockKeyhole size={18} aria-hidden="true" focusable="false" />
+          <PasswordInput
             className="input"
             id="login-password"
             name="password"
-            type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             readOnly={busy}
             aria-invalid={error ? true : undefined}
@@ -102,19 +99,6 @@ export default function Login({
             maxLength={256}
             required
           />
-          <button
-            type="button"
-            className="auth-eye"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            aria-pressed={showPassword}
-            onClick={() => setShowPassword((v) => !v)}
-          >
-            {showPassword ? (
-              <EyeOff size={18} aria-hidden="true" />
-            ) : (
-              <Eye size={18} aria-hidden="true" />
-            )}
-          </button>
           <span className="highlight" aria-hidden="true" />
         </div>
         {capsLock && (
@@ -122,9 +106,21 @@ export default function Login({
             Caps Lock is on.
           </p>
         )}
+        <details className="login-mfa">
+          <summary>Authenticator or recovery code (if enabled)</summary>
+          <label htmlFor="login-code">Sign-in code</label>
+          <input
+            id="login-code"
+            name="code"
+            autoComplete="one-time-code"
+            maxLength={30}
+            placeholder="Authenticator or recovery code"
+            readOnly={busy}
+          />
+        </details>
         <div className="auth-form-options">
           <span>
-            <ShieldCheck size={14} aria-hidden="true" />
+            <ShieldCheck size={14} aria-hidden="true" focusable="false" />
             Secure sign-in
           </span>
           <button
@@ -154,9 +150,10 @@ export default function Login({
               className="auth-spinner"
               size={18}
               aria-hidden="true"
+              focusable="false"
             />
           ) : (
-            <ArrowRight size={18} aria-hidden="true" />
+            <ArrowRight size={18} aria-hidden="true" focusable="false" />
           )}
         </button>
       </form>

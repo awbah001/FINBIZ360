@@ -1,0 +1,740 @@
+/* Shared reference language: canvas, icons, navigation, controls, records and motion.
+   Existing page composition, teal brand, business data and workflows stay in place. */
+/* Shared values live in ui-tokens.css; this file owns compositions only. */
+
+/* Operational data stays on quiet white surfaces; colour belongs to summaries and icons. */
+.reference-workspace :is(.reference-panel, .panel, .role-task),
+.home-page .home-feature-grid > .effect-card {
+  border-radius: var(--card-radius);
+  border-color: color-mix(in srgb, var(--line) 74%, white);
+}
+.reference-workspace :is(.reference-panel, .panel) {
+  box-shadow: var(--card-shadow);
+}
+.reference-workspace
+  :is(.card-icon, .role-panel-icon, .account-icon, .contact-avatar) {
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 #ffffffb3,
+    0 4px 12px color-mix(in srgb, var(--tone) 10%, transparent);
+}
+.auth-page .auth-shell {
+  border-radius: 30px;
+}
+.reference-workspace .workspace-search {
+  background: color-mix(
+    in srgb,
+    var(--primary-soft) 20%,
+    var(--reference-surface)
+  );
+  border: 1px solid color-mix(in srgb, var(--line) 55%, white);
+  border-radius: 16px;
+}
+.reference-workspace .workspace-search > svg {
+  box-sizing: content-box;
+  padding: 9px;
+  border-radius: 11px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary-soft) 52%, white);
+}
+.reference-workspace :is(.dashboard-welcome, .module-hero) {
+  border-radius: 26px;
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, white);
+  box-shadow: var(--card-shadow);
+}
+.reference-workspace .dashboard-welcome {
+  background:
+    radial-gradient(
+      ellipse at 94% 5%,
+      color-mix(in srgb, var(--flavor-violet) 10%, transparent),
+      transparent 62%
+    ),
+    linear-gradient(
+      110deg,
+      color-mix(in srgb, var(--primary-soft) 58%, white),
+      #f6fbfc
+    );
+}
+.reference-workspace .dashboard-welcome::after {
+  opacity: 0.28;
+}
+.reference-workspace .module-hero .page-heading-icon {
+  border: 1px solid #ffffffbd;
+  box-shadow:
+    inset 0 1px 0 white,
+    0 8px 18px color-mix(in srgb, var(--tone) 12%, transparent);
+}
+
+/* Folder-like, solid-colour summary cards with high-contrast values. */
+.reference-workspace .reference-metric.effect-card {
+  --summary-color: var(--primary);
+  --summary-deep: var(--primary-hover);
+  --card-title-color: #fff;
+  --card-description-color: #fff;
+  border: 1px solid #ffffff44;
+  border-radius: 23px;
+  background: linear-gradient(
+    145deg,
+    var(--summary-color),
+    var(--summary-deep)
+  );
+  box-shadow:
+    0 6px 10px -5px color-mix(in srgb, var(--summary-deep) 40%, transparent),
+    var(--card-shadow);
+  color: var(--card-title-color);
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+.reference-workspace .reference-metric.tone-blue {
+  --summary-color: #4168ce;
+  --summary-deep: #2c50b0;
+}
+.reference-workspace .reference-metric.tone-purple {
+  --summary-color: #6b57da;
+  --summary-deep: var(--flavor-violet);
+}
+.reference-workspace .reference-metric.tone-orange {
+  --summary-color: #c34739;
+  --summary-deep: var(--flavor-coral);
+}
+.reference-workspace .reference-metric.tone-cyan {
+  --summary-color: #0a7886;
+  --summary-deep: #08707f;
+}
+.reference-workspace .reference-metric.tone-green {
+  --summary-color: #137958;
+  --summary-deep: #116d51;
+}
+.reference-workspace .reference-metric.tone-rose {
+  --summary-color: #bf2f59;
+  --summary-deep: #b52c58;
+}
+.reference-workspace .reference-metric.tone-slate {
+  --summary-color: #52637d;
+  --summary-deep: #354760;
+}
+.reference-workspace .reference-metric.tone-amber {
+  --summary-color: #f8cf76;
+  --summary-deep: var(--flavor-gold);
+  --card-title-color: #4e340d;
+  --card-description-color: #624515;
+}
+.reference-workspace .reference-metric.effect-card::before {
+  inset: -75px -55px auto auto;
+  width: 150px;
+  height: 150px;
+  border: 26px solid #ffffff0d;
+  border-radius: 50%;
+  background: transparent;
+  clip-path: none;
+  transition: none;
+}
+.reference-workspace .reference-metric.effect-card::after {
+  content: "";
+  inset: auto -32px -52px auto;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  padding: 0;
+  background: #ffffff0a;
+}
+.reference-workspace .reference-metric.effect-card :is(h2, strong) {
+  color: var(--card-title-color);
+}
+.reference-workspace .reference-metric.effect-card .metric-note {
+  color: var(--card-description-color);
+  background: transparent;
+  line-height: 1.55;
+}
+.reference-workspace .reference-metric .metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #ffffff22;
+  border: 1px solid #ffffff24;
+  box-shadow: inset 0 1px 0 #ffffff26;
+  color: var(--card-title-color);
+}
+.reference-workspace .reference-metric .metric-sparkline {
+  color: #ffffffa6;
+  opacity: 0.55;
+}
+.reference-workspace .reference-metric.effect-card:hover {
+  --card-title-color: #fff;
+  --card-description-color: #fff;
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+.reference-workspace .reference-metric.tone-amber.effect-card:hover {
+  --card-title-color: #4e340d;
+  --card-description-color: #624515;
+}
+.reference-workspace .role-task {
+  background: linear-gradient(
+    145deg,
+    white,
+    color-mix(in srgb, var(--tone-bg) 35%, white)
+  );
+  border-top: 3px solid color-mix(in srgb, var(--tone) 58%, white);
+}
+.reference-workspace .role-task-icon {
+  border-radius: 13px;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--tone) 10%, transparent);
+  transition: transform 180ms var(--ease-out);
+}
+.reference-workspace .role-task:hover .role-task-icon {
+  transform: translateY(-2px) rotate(-3deg);
+}
+.reference-workspace .table-scroll :is(th, td) {
+  border-bottom-color: color-mix(in srgb, var(--line) 68%, white);
+}
+.reference-workspace .table-scroll thead th {
+  background: var(--reference-surface);
+}
+.reference-workspace .table-scroll tbody tr:hover {
+  background: color-mix(in srgb, var(--primary-soft) 20%, white);
+}
+.reference-workspace .role-activity li {
+  border-bottom-color: color-mix(in srgb, var(--line) 65%, white);
+}
+.reference-workspace :is(.role-event-icon, .insight-icon) {
+  border-radius: 11px;
+}
+
+/* The calendar extends the existing date popover without replacing range inputs. */
+.reference-workspace .header-date-popover {
+  width: min(340px, calc(100vw - 32px));
+  max-height: min(680px, calc(100dvh - 120px));
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: white;
+  box-shadow: var(--card-shadow-floating);
+}
+.calendar-heading,
+.calendar-month-navigation,
+.calendar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.calendar-heading {
+  margin-bottom: 18px;
+}
+.calendar-heading > strong {
+  font-size: var(--text-large);
+}
+.calendar-view-toggle {
+  display: inline-flex;
+  border-radius: 10px;
+  background: var(--reference-surface);
+  padding: 3px;
+}
+.calendar-view-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 7px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-small);
+  cursor: pointer;
+}
+.calendar-view-toggle button[aria-pressed="true"] {
+  color: white;
+  background: var(--primary);
+  box-shadow: 0 3px 7px #0f766e24;
+}
+.calendar-month-navigation {
+  margin-bottom: 12px;
+}
+.calendar-month-navigation strong {
+  font-size: var(--text-ui);
+}
+.calendar-month-navigation .icon-button {
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  background: var(--reference-surface);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.calendar-weekdays,
+.calendar-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.calendar-weekdays {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.calendar-day {
+  display: grid;
+  place-items: center;
+  height: 34px;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+}
+button.calendar-day {
+  cursor: pointer;
+  transition:
+    background 140ms,
+    border-color 140ms;
+}
+.calendar-day.is-adjacent {
+  color: var(--muted);
+}
+button.calendar-day:hover {
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+}
+.calendar-day.is-today {
+  border-color: var(--flavor-violet);
+  color: var(--flavor-violet);
+  font-weight: 750;
+}
+.calendar-day.is-in-range {
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+}
+.calendar-day[aria-pressed="true"].is-today {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.calendar-footer {
+  margin-top: 14px;
+}
+.calendar-footer > span {
+  max-width: 180px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  line-height: 1.6;
+}
+.calendar-range-fields {
+  display: grid;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.reference-workspace .calendar-range-fields label {
+  margin: 0;
+}
+.workspace-calendar :is(button, .icon-button):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Short, one-time entrances; no motion on operational forms, rows or monetary values. */
+@keyframes reference-card-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reference-workspace .dashboard-welcome {
+    animation: reference-card-arrival 300ms var(--ease-out) both;
+  }
+  .reference-workspace .reference-metric {
+    animation: reference-card-arrival 320ms var(--ease-out) backwards;
+  }
+  .reference-workspace .reference-metric:nth-child(2) {
+    animation-delay: 35ms;
+  }
+  .reference-workspace .reference-metric:nth-child(3) {
+    animation-delay: 70ms;
+  }
+  .reference-workspace .reference-metric:nth-child(4) {
+    animation-delay: 105ms;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reference-workspace
+    :is(.reference-metric.effect-card, .role-task-icon, .calendar-day) {
+    animation: none;
+    transition: none;
+  }
+  .reference-workspace .reference-metric.effect-card:hover,
+  .reference-workspace .role-task:hover .role-task-icon {
+    transform: none;
+  }
+}
+@media (pointer: coarse) {
+  .calendar-day {
+    height: 44px;
+  }
+  .calendar-month-navigation .icon-button,
+  .calendar-view-toggle button {
+    min-height: 44px;
+  }
+}
+@media (max-width: 760px) {
+  .reference-workspace .header-date-popover {
+    position: fixed;
+    top: 84px;
+    right: 16px;
+  }
+}
+
+.home-page .home-feature-grid > .effect-card {
+  border-top: 3px solid color-mix(in srgb, var(--tone) 60%, white);
+}
+.home-page .home-feature-icon {
+  border-radius: 14px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--tone) 12%, transparent);
+}
+.home-page .home-workspace-card {
+  border-radius: 26px;
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+/* White-led application shell: the reference's calm space extends beyond cards. */
+.app-shell.reference-workspace {
+  background: var(--surface-canvas);
+}
+.reference-workspace > main {
+  background: #fff;
+}
+.reference-workspace .page-content {
+  background: #fff;
+  padding-top: 20px;
+}
+.reference-workspace .workspace-topbar {
+  background: #fff;
+  border-bottom: 1px solid #f1f3f8;
+}
+.reference-workspace .page-footer {
+  background: #fff;
+  border-top-color: var(--line);
+}
+.reference-workspace .workspace-breadcrumb {
+  color: var(--muted);
+  padding: 5px 0 10px;
+}
+.reference-workspace .workspace-breadcrumb > button {
+  color: var(--primary);
+}
+.reference-workspace .filter-bar {
+  border: 1px solid var(--line);
+  background: linear-gradient(110deg, #fafbfe, #fff);
+  border-radius: 20px;
+  box-shadow: none;
+  padding: 16px;
+  gap: 14px;
+}
+.reference-workspace
+  :is(.count-label, .subtle-tag, .scope-chip, .role-access-tag) {
+  border: 1px solid var(--line);
+  background: var(--reference-surface);
+  color: var(--muted);
+  box-shadow: none;
+}
+.reference-workspace .scope-chip strong {
+  color: var(--primary);
+}
+.reference-workspace .panel-header {
+  border-bottom-color: var(--line);
+}
+.reference-workspace :is(.pagination, .panel-note) {
+  background: var(--surface-record);
+  border-color: var(--line);
+}
+
+/* One duotone icon family, shared by all roles and operational modules. */
+.system-icon {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--tone) 10%, white);
+  border-radius: 14px;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone-bg) 72%, white);
+  box-shadow:
+    inset 0 1px 0 white,
+    0 5px 12px -8px color-mix(in srgb, var(--tone) 35%, transparent);
+  transition:
+    transform 180ms var(--ease-out),
+    background-color 180ms,
+    box-shadow 180ms;
+}
+.system-icon > .system-icon-underlay,
+.reference-workspace .system-icon > .system-icon-underlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.system-icon > .system-icon-glyph,
+.reference-workspace .system-icon > .system-icon-glyph {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  height: auto;
+  stroke: none;
+}
+.reference-workspace .nav-icon.system-icon,
+.reference-workspace .nav-item.active .nav-icon.system-icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--tone-on-dark);
+  background: transparent;
+  box-shadow: none;
+}
+.reference-workspace .nav-item.active .nav-icon.system-icon {
+  color: var(--brand-start);
+}
+.reference-workspace .nav-item:hover .system-icon {
+  transform: none;
+}
+.reference-workspace .system-icon-hero.page-heading-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #ffffffc9;
+  color: var(--tone);
+}
+.reference-workspace .reference-metric .system-icon-metric {
+  color: var(--card-title-color);
+  background: #ffffff22;
+  border-color: #ffffff38;
+}
+.reference-workspace .reference-quick-actions .system-icon-shortcut {
+  color: var(--tone);
+  background: var(--tone-bg);
+  border-color: color-mix(in srgb, var(--tone) 12%, white);
+}
+.reference-workspace
+  :is(.dashboard-refresh, .dashboard-notifications, .workspace-profile) {
+  border-radius: 13px;
+  border: 1px solid #eef0f7;
+  box-shadow: 0 4px 12px -9px #3746653b;
+  transition:
+    background-color 160ms,
+    box-shadow 160ms;
+}
+.reference-workspace .dashboard-refresh {
+  background: #edf3ff;
+  color: #4168ce;
+}
+.reference-workspace .dashboard-notifications {
+  background: #fff6e5;
+  color: #93600e;
+}
+.reference-workspace .workspace-profile {
+  background: #f1edff;
+  color: var(--flavor-violet);
+}
+.reference-workspace .workspace-search > svg {
+  color: var(--flavor-violet);
+  background: #eeebff;
+}
+.reference-workspace .workspace-date {
+  background: #f5f3ff;
+  border-color: #ebe6fa;
+  color: #665394;
+  border-radius: 12px;
+}
+
+/* Smooth controls and forms, including shared dialogs and authentication fields. */
+:is(.reference-workspace, .home-page, .auth-page) .button {
+  transition:
+    background-color 180ms,
+    color 180ms,
+    box-shadow 180ms,
+    transform 180ms var(--ease-out);
+}
+:is(.reference-workspace, .home-page, .auth-page)
+  .button:not(:disabled):not([aria-disabled="true"]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px -6px
+    color-mix(in srgb, var(--primary) 36%, transparent);
+}
+:is(.reference-workspace, .home-page, .auth-page)
+  .button.secondary:not(.danger):not(:disabled):not(
+    [aria-disabled="true"]
+  ):hover {
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 28%, white);
+}
+:is(.reference-workspace, .home-page, .auth-page)
+  .button:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+.reference-workspace
+  .button.secondary:not(:hover)
+  > :is(.icon-download, .icon-upload, .icon-file-text) {
+  color: var(--color-blue);
+}
+.reference-workspace
+  .button.secondary:not(:hover)
+  > :is(.icon-check, .icon-checks) {
+  color: var(--success);
+}
+.reference-workspace
+  .button.secondary:not(:hover)
+  > :is(.icon-history, .icon-settings) {
+  color: var(--flavor-violet);
+}
+:is(.reference-workspace, .auth-page) .input-container {
+  background: #f8f9fd;
+  border: 1px solid #e8ecf5;
+  border-radius: var(--radius-field);
+  box-shadow: inset 0 1px 2px #29385b03;
+}
+:is(.reference-workspace, .auth-page) .input-container:hover {
+  background: #f4f5fc;
+  border-color: #dadfec;
+}
+:is(.reference-workspace, .auth-page) .input-container:focus-within {
+  background: #fff;
+  border-color: color-mix(in srgb, var(--primary) 55%, white);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 9%, transparent);
+}
+.reference-workspace :is(input.input, select.input, textarea.input) {
+  border-radius: var(--radius-field);
+}
+.reference-workspace .icon-button {
+  border-radius: 11px;
+  background: var(--reference-surface);
+}
+.overlay .modal {
+  background: #fff;
+  border: 1px solid #edf0f7;
+  border-radius: 26px;
+  box-shadow: var(--card-shadow-floating);
+}
+.overlay :is(.modal-head, .modal-footer) {
+  background: #fcfcff;
+  border-color: var(--line);
+}
+.overlay .modal-head h2 {
+  letter-spacing: -0.025em;
+}
+.overlay .icon-button {
+  color: #83619d;
+  background: #f3effa;
+  border-radius: 12px;
+}
+
+/* File-list-like rows keep every existing financial column, link and action. */
+.reference-workspace .table-scroll table {
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+.reference-workspace .table-scroll thead th {
+  background: #fff;
+  border-bottom: 0;
+  color: var(--muted);
+}
+.reference-workspace .table-scroll tbody td {
+  background: var(--surface-record);
+  border-bottom: 0;
+  transition: background-color 160ms;
+}
+.reference-workspace .table-scroll tbody td:first-child {
+  border-radius: 12px 0 0 12px;
+}
+.reference-workspace .table-scroll tbody td:last-child {
+  border-radius: 0 12px 12px 0;
+}
+.reference-workspace .table-scroll tbody tr:hover td {
+  background: var(--surface-tint);
+}
+.reference-workspace .table-scroll .row-link {
+  color: #3f5474;
+  font-weight: 650;
+}
+.reference-workspace .table-scroll .row-link:hover {
+  color: var(--primary);
+}
+.reference-workspace .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.reference-workspace .badge:not(:has(svg))::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.reference-workspace :is(.role-activity li, .reference-activity-list > button) {
+  border-radius: 12px;
+  transition: background-color 160ms;
+}
+.reference-workspace .role-activity li {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.reference-workspace .role-activity li:hover {
+  background: #fafaff;
+}
+.reference-workspace .role-task {
+  box-shadow: var(--card-shadow);
+}
+.reference-workspace .role-task:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+.calendar-view-toggle button[aria-pressed="true"] {
+  background: var(--flavor-violet);
+}
+
+@keyframes reference-surface-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reference-workspace .page-content > :is(.panel, .module-hero, .filter-bar),
+  .overlay .modal {
+    animation: reference-surface-arrival 230ms var(--ease-out) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .system-icon,
+  .reference-workspace .table-scroll tbody td,
+  :is(.reference-workspace, .home-page, .auth-page) .button {
+    transition: none;
+  }
+  .reference-workspace .nav-item:hover .system-icon,
+  :is(.reference-workspace, .home-page, .auth-page)
+    .button:not(:disabled):hover {
+    transform: none;
+  }
+}

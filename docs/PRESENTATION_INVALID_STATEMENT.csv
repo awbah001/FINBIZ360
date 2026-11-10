@@ -1,0 +1,4 @@
+Date,Amount,Direction,Reference,Description,Currency
+not-a-date,250.00,out,PRESENT-INVALID-DATE,Deliberately invalid date,SLE
+2026-11-08,not-an-amount,out,PRESENT-INVALID-AMOUNT,Deliberately invalid amount,SLE
+2026-11-08,10.00,wrong,PRESENT-INVALID-DIRECTION,Deliberately invalid direction,SLE

@@ -2,16 +2,15 @@ import { useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowLeft,
-  Building2,
-  Mail,
-  UserRound,
-  LockKeyhole,
+  BuildingOffice as Building2,
+  Envelope as Mail,
+  UserCircle as UserRound,
+  LockKey as LockKeyhole,
   ShieldCheck,
   Check,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import AuthFrame from "./AuthFrame";
+import { FormInput } from "./PasswordInput";
 
 export default function Setup({
   tokenRequired,
@@ -22,8 +21,7 @@ export default function Setup({
 }) {
   const [step, setStep] = useState(1),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
-    [showPasswords, setShowPasswords] = useState(false);
+    [error, setError] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState<Record<string, string>>({
     organisation: "",
@@ -55,12 +53,15 @@ export default function Setup({
       <div className="auth-field" key={name}>
         <label htmlFor={`setup-${name}`}>{label}</label>
         <div className="auth-input input-container">
-          <Icon size={14} />
-          <input
+          <Icon size={18} aria-hidden="true" focusable="false" />
+          <FormInput
             className="input"
             id={`setup-${name}`}
             name={name}
-            type={type === "password" && showPasswords ? "text" : type}
+            type={type}
+            visibilityLabel={
+              name === "setup_token" ? "setup token" : label.toLowerCase()
+            }
             placeholder={placeholder || `Enter ${label.toLowerCase()}`}
             required
             aria-describedby={
@@ -121,7 +122,19 @@ export default function Setup({
           aria-current={step === 1 ? "step" : undefined}
           className={step === 1 ? "current" : "done"}
         >
-          <span>{step === 1 ? "1" : <Check size={12} />}</span>Company & owner
+          <span>
+            {step === 1 ? (
+              "1"
+            ) : (
+              <Check
+                size={12}
+                aria-hidden="true"
+                focusable="false"
+                className="icon-check"
+              />
+            )}
+          </span>
+          Company & owner
         </li>
         <li
           aria-current={step === 2 ? "step" : undefined}
@@ -132,7 +145,7 @@ export default function Setup({
       </ol>
       <form
         ref={formRef}
-        className="auth-form auth-setup-form"
+        className="auth-form auth-setup-form finbiz-form finbiz-form-auth"
         onSubmit={async (e) => {
           e.preventDefault();
           setError("");
@@ -208,7 +221,7 @@ export default function Setup({
           ) : (
             <>
               <div className="auth-role-note">
-                <ShieldCheck size={18} />
+                <ShieldCheck size={18} aria-hidden="true" focusable="false" />
                 <p>
                   The administrator manages users and settings. Financial
                   approvals stay with the manager.
@@ -247,17 +260,9 @@ export default function Setup({
         </div>
         <div className="auth-form-options">
           <span>
-            <LockKeyhole size={12} />
+            <LockKeyhole size={12} aria-hidden="true" focusable="false" />
             12+ characters per password
           </span>
-          <button
-            type="button"
-            aria-pressed={showPasswords}
-            onClick={() => setShowPasswords((v) => !v)}
-          >
-            {showPasswords ? <EyeOff size={13} /> : <Eye size={13} />}{" "}
-            {showPasswords ? "Hide" : "Show"}
-          </button>
         </div>
         {error && (
           <div className="error" role="alert">
@@ -272,7 +277,7 @@ export default function Setup({
               disabled={busy}
               onClick={() => changeStep(1)}
             >
-              <ArrowLeft size={15} />
+              <ArrowLeft size={15} aria-hidden="true" focusable="false" />
               Back
             </button>
           )}
@@ -282,7 +287,7 @@ export default function Setup({
               : step === 1
                 ? "Continue"
                 : "Create workspace"}
-            <ArrowRight size={15} />
+            <ArrowRight size={15} aria-hidden="true" focusable="false" />
           </button>
         </div>
       </form>

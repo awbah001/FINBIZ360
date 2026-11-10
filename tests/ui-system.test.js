@@ -23,7 +23,7 @@ test("matching picker preserves exact remaining signed totals and accessible sel
       format: "esm",
       platform: "node",
       jsx: "automatic",
-      external: ["react", "react/*", "lucide-react"],
+      external: ["react", "react/*", "@phosphor-icons/react"],
       loader: { ".css": "empty" },
       logLevel: "silent",
     });

@@ -154,10 +154,10 @@
   padding-bottom: 10px;
 }
 .reference-workspace .dashboard-welcome {
-  background: #ccfbf1;
+  background: linear-gradient(105deg, var(--primary-soft), #CCFBF1 48%, var(--primary-border));
 }
-.reference-workspace .workspace-profile > span {
-  background: #14b8a6;
+.reference-workspace .workspace-profile > .workspace-profile-status {
+  background: var(--success);
 }
 .dashboard-obligations {
   display: grid;
@@ -169,10 +169,10 @@
   display: grid;
   text-align: left;
   gap: 8px;
-  border: 1px solid #deeeeb;
-  border-radius: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
   padding: 16px;
-  background: white;
+  background: var(--surface-raised);
   color: var(--ink);
 }
 .dashboard-obligations strong {
@@ -198,9 +198,9 @@
 .loading-skeleton > span {
   display: block;
   height: 120px;
-  background: linear-gradient(100deg, #edf4f4 20%, #f8fcfc 40%, #edf4f4 60%);
+  background: linear-gradient(100deg, var(--surface-soft) 20%, var(--surface-canvas) 40%, var(--surface-soft) 60%);
   background-size: 200% 100%;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
 .loading-skeleton > span:last-child {
@@ -247,10 +247,10 @@
   left: 0;
   width: min(540px, 78vw);
   z-index: 45;
-  background: white;
-  border: 1px solid #d8ece9;
-  border-radius: 16px;
-  box-shadow: 0 12px 32px #16364126;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow-floating);
   max-height: 400px;
   overflow: auto;
   padding: 12px;
@@ -265,7 +265,7 @@
 .global-search-heading > button {
   border: 0;
   background: transparent;
-  color: #0f766e;
+  color: var(--primary);
   padding: 6px;
 }
 .global-search-results > button {
@@ -282,7 +282,7 @@
   border-radius: 8px;
 }
 .global-search-results > button:hover {
-  background: #f0faf8;
+  background: var(--surface-tint);
 }
 .global-search-results > button > span {
   font-size: var(--text-small);
@@ -367,7 +367,7 @@
 .workspace-breadcrumb button {
   border: 0;
   background: transparent;
-  color: #0f766e;
+  color: var(--primary);
   padding: 0;
   font-size: inherit;
 }

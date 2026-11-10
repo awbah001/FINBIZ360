@@ -1,0 +1,3 @@
+Date,Amount,Direction,Reference,Description,Currency
+2026-11-08,250.00,out,PRESENT-EXP-001,Presentation supplies payment,SLE
+2026-11-08,15.00,out,PRESENT-BANK-FEE-001,Fee requiring investigation,SLE

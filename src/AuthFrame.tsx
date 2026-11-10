@@ -1,11 +1,11 @@
+import BrandLogo from "./BrandLogo";
 import { useState, type ReactNode } from "react";
 import {
   ArrowLeft,
-  ChartNoAxesCombined,
-  LockKeyhole,
+  LockKey as LockKeyhole,
   Pause,
   Play,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import "./auth.css";
 
 export default function AuthFrame({
@@ -43,9 +43,9 @@ export default function AuthFrame({
             onClick={() => setMotionPaused((v) => !v)}
           >
             {motionPaused ? (
-              <Play size={14} aria-hidden="true" />
+              <Play size={14} aria-hidden="true" focusable="false" />
             ) : (
-              <Pause size={14} aria-hidden="true" />
+              <Pause size={14} aria-hidden="true" focusable="false" />
             )}
             <span>
               {motionPaused ? "Resume background" : "Pause background"}
@@ -54,14 +54,14 @@ export default function AuthFrame({
         </>
       )}
       <a className="auth-home-link" href="/">
-        <ArrowLeft size={14} />
+        <ArrowLeft size={14} aria-hidden="true" focusable="false" />
         Back to home
       </a>
       <span className="auth-backdrop-dots" aria-hidden="true" />
       <div className={`auth-shell ${registration ? "auth-registration" : ""}`}>
         <aside className="auth-hero">
           <a className="auth-brand" href="/" aria-label="FinBiz 360 home">
-            <ChartNoAxesCombined size={22} />
+            <BrandLogo />
             <span>
               FinBiz <strong>360</strong>
             </span>
@@ -101,15 +101,14 @@ export default function AuthFrame({
             </p>
           </div>
           <div className="auth-hero-footer">
-            <LockKeyhole size={13} />
+            <LockKeyhole size={13} aria-hidden="true" focusable="false" />
             <span>Your records. Your decisions. Your business.</span>
           </div>
         </aside>
         <section className="auth-content">
           <div className="auth-form-wrap">
-            <div className="auth-logo" aria-label="FinBiz 360">
-              <ChartNoAxesCombined size={32} />
-              <span className="auth-logo-dot" />
+            <div className="auth-logo">
+              <BrandLogo label="FinBiz 360" />
             </div>
             {children}
           </div>

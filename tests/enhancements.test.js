@@ -71,7 +71,7 @@ async function preview(c, content) {
 test("new schema retains seeded financial and audit records with foreign-key integrity", () => {
   const before = db.prepare("SELECT COUNT(*) n FROM transactions").get().n,
     events = db.prepare("SELECT COUNT(*) n FROM audit_events").get().n;
-  assert.equal(db.prepare("SELECT COUNT(*) n FROM migrations").get().n, 7);
+  assert.equal(db.prepare("SELECT COUNT(*) n FROM migrations").get().n, 11);
   assert.equal(
     db
       .prepare("SELECT COUNT(*) n FROM transactions WHERE approval='pending'")
@@ -387,6 +387,25 @@ test("itemised invoices, draft issue/cancel, partial payments and allocation cor
     (d) => d.id === invoice.body.id,
   );
   assert.equal(doc.paid, "0");
+  assert.equal((await allocate()).status, 200);
+  assert.equal((await allocate()).status, 409);
+  const history = (
+    await c.agent.get(`/api/invoices/${invoice.body.id}/payments`)
+  ).body;
+  assert.equal(history.length, 2);
+  assert.equal(
+    history.find((p) => p.id === payment.id).correction_reason,
+    "Wrong invoice selected; retain history",
+  );
+  const replacement = history.find((p) => p.id !== payment.id);
+  assert.equal(
+    (
+      await send(c, "post", `/allocations/${replacement.id}/correct`, {
+        reason: "Correct replacement before cancelling test invoice",
+      })
+    ).status,
+    200,
+  );
   assert.equal(
     (
       await send(c, "patch", `/invoices/${invoice.body.id}`, {
@@ -445,6 +464,31 @@ test("supplier bill allocation requires approved same-supplier payments and cann
   );
   assert.equal(b.status, "paid");
   assert.equal(b.outstanding, "0");
+  const originalAllocation = (
+    await c.agent.get(`/api/supplier-bills/${bill.body.id}/payments`)
+  ).body[0];
+  assert.equal(
+    (
+      await send(
+        c,
+        "post",
+        `/supplier-allocations/${originalAllocation.id}/correct`,
+        {
+          reason: "Correct test supplier allocation and retain payment",
+        },
+      )
+    ).status,
+    200,
+  );
+  assert.equal((await allocate("75.00")).status, 200);
+  assert.equal((await allocate("0.01")).status, 409);
+  const history = (
+    await c.agent.get(`/api/supplier-bills/${bill.body.id}/payments`)
+  ).body;
+  assert.equal(history.length, 2);
+  assert.ok(
+    history.find((p) => p.id === originalAllocation.id).correction_reason,
+  );
   assert.equal(
     (
       await send(manager, "post", `/transactions/${payment.body.id}/reverse`, {

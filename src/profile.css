@@ -14,9 +14,13 @@
 .profile-cover {
   height: 88px;
   background:
-    radial-gradient(circle at 85% 15%, #d7b6ff70, transparent 55%),
-    linear-gradient(125deg, #e7e9fa, #f3eaff);
-  border-bottom: 1px solid #e6def3;
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(196, 181, 253, 0.44),
+      transparent 55%
+    ),
+    linear-gradient(125deg, var(--surface-soft), var(--primary-soft));
+  border-bottom: 1px solid var(--primary-border);
 }
 .profile-identity-body {
   padding: 0 22px 22px;
@@ -35,6 +39,45 @@
   box-shadow: 0 4px 16px #39205b12;
   font-size: 1.5rem;
   font-weight: 750;
+}
+.profile-avatar,
+.reference-workspace .user-avatar {
+  overflow: hidden;
+}
+.profile-avatar img,
+.reference-workspace .user-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-photo-input {
+  display: none;
+}
+.profile-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.profile-photo-help,
+.profile-photo-status,
+.profile-photo-error {
+  margin: 10px 0;
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+.profile-photo-help {
+  color: var(--muted);
+}
+.profile-photo-status {
+  color: var(--primary);
+}
+.profile-photo-status:empty {
+  margin: 0;
+}
+.profile-photo-error {
+  color: var(--danger);
 }
 .profile-identity h2 {
   font-size: 1.25rem;

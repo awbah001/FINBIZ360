@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
-  CircleAlert,
-  Download,
+  WarningCircle as CircleAlert,
+  DownloadSimple as Download,
   FileText,
-  Search,
-  Upload,
-} from "lucide-react";
+  MagnifyingGlass as Search,
+  UploadSimple as Upload,
+} from "@phosphor-icons/react";
 import CardTitle from "./CardTitle";
 import InputSurface from "./InputSurface";
+import { UserIdentity } from "./UserAvatar";
 import RecordPicker, { selectedSummary } from "./RecordPicker";
 import useUnsavedChanges from "./useUnsavedChanges";
 
@@ -27,10 +28,13 @@ type Shared = {
   money: (value?: string | number) => string;
   refresh: (message?: string) => void;
   canEdit: boolean;
+  can?: (permission: string) => boolean;
   canExport?: boolean;
   role: string;
   revision: number;
 };
+const permitted = (shared: Shared, permission: string) =>
+  shared.can ? shared.can(permission) : shared.canEdit;
 const reason = {
   name: "reason",
   label: "Reason / review note",
@@ -43,7 +47,7 @@ const statusOptions = [
 function ErrorNotice({ error }: { error: string }) {
   return error ? (
     <p className="error" role="alert">
-      <CircleAlert size={17} />
+      <CircleAlert size={17} aria-hidden="true" focusable="false" />
       {error}
     </p>
   ) : null;
@@ -75,7 +79,7 @@ export function ContactDirectory({
     <>
       <div className="enhancement-toolbar">
         <label>
-          <Search size={16} />
+          <Search size={16} aria-hidden="true" focusable="false" />
           Search contacts
           <InputSurface>
             <input
@@ -132,59 +136,60 @@ export function ContactDirectory({
                 }}
               >
                 View history
-                <ArrowRight size={14} />
+                <ArrowRight size={14} aria-hidden="true" focusable="false" />
               </button>
-              {shared.canEdit && (
-                <button
-                  className="button secondary small"
-                  onClick={() =>
-                    shared.form(
-                      "Edit contact",
-                      [
-                        { name: "name", label: "Name", value: c.name },
-                        {
-                          name: "phone",
-                          label: "Phone",
-                          value: c.phone,
-                          required: false,
-                        },
-                        {
-                          name: "email",
-                          label: "Email",
-                          type: "email",
-                          value: c.email,
-                          required: false,
-                        },
-                        {
-                          name: "address",
-                          label: "Address",
-                          type: "textarea",
-                          value: c.address,
-                          required: false,
-                        },
-                        {
-                          name: "reference",
-                          label: "Customer / supplier reference",
-                          value: c.reference,
-                          required: false,
-                        },
-                        {
-                          name: "active",
-                          label: "Status",
-                          value: String(Boolean(c.active)),
-                          options: statusOptions,
-                        },
-                        reason,
-                      ],
-                      `/contacts/${c.id}`,
-                      {},
-                      "PATCH",
-                    )
-                  }
-                >
-                  Edit contact
-                </button>
-              )}
+              {shared.canEdit &&
+                permitted(shared, "finance.contact.update") && (
+                  <button
+                    className="button secondary small"
+                    onClick={() =>
+                      shared.form(
+                        "Edit contact",
+                        [
+                          { name: "name", label: "Name", value: c.name },
+                          {
+                            name: "phone",
+                            label: "Phone",
+                            value: c.phone,
+                            required: false,
+                          },
+                          {
+                            name: "email",
+                            label: "Email",
+                            type: "email",
+                            value: c.email,
+                            required: false,
+                          },
+                          {
+                            name: "address",
+                            label: "Address",
+                            type: "textarea",
+                            value: c.address,
+                            required: false,
+                          },
+                          {
+                            name: "reference",
+                            label: "Customer / supplier reference",
+                            value: c.reference,
+                            required: false,
+                          },
+                          {
+                            name: "active",
+                            label: "Status",
+                            value: String(Boolean(c.active)),
+                            options: statusOptions,
+                          },
+                          reason,
+                        ],
+                        `/contacts/${c.id}`,
+                        {},
+                        "PATCH",
+                      )
+                    }
+                  >
+                    Edit contact
+                  </button>
+                )}
             </div>
           </article>
         ))}
@@ -279,13 +284,19 @@ export function TransactionEvidence({
           href={`/api/evidence/${file.id}`}
           className="button secondary small"
         >
-          <Download size={15} />
+          <Download
+            size={15}
+            aria-hidden="true"
+            focusable="false"
+            className="icon-download"
+          />
           {file.filename}
         </a>
       ))}
       {!files.length && <p>No evidence files attached.</p>}
-      {shared.canEdit && (
+      {shared.canEdit && permitted(shared, "finance.evidence.upload") && (
         <form
+          className="finbiz-form"
           onSubmit={async (e) => {
             e.preventDefault();
             if (busy) return;
@@ -319,12 +330,18 @@ export function TransactionEvidence({
             />
           </label>
           <button className="button small" disabled={busy}>
-            <Upload size={15} />
+            <Upload
+              size={15}
+              aria-hidden="true"
+              focusable="false"
+              className="icon-upload"
+            />
             {busy ? "Uploading…" : "Attach evidence"}
           </button>
         </form>
       )}
       {shared.canEdit &&
+        permitted(shared, "finance.transaction.verify") &&
         shared.role !== "cashier" &&
         transaction.payment_status !== "evidence_verified" && (
           <button
@@ -375,23 +392,26 @@ export function InvoiceActions({
         </details>
       )}
       <ErrorNotice error={error} />
-      {shared.canEdit && invoice.lifecycle === "draft" && (
-        <button
-          className="button secondary small"
-          onClick={() =>
-            shared.form(
-              "Issue invoice",
-              [reason],
-              `/invoices/${invoice.id}`,
-              { lifecycle: "issued" },
-              "PATCH",
-            )
-          }
-        >
-          Issue invoice
-        </button>
-      )}
       {shared.canEdit &&
+        permitted(shared, "finance.invoice.update") &&
+        invoice.lifecycle === "draft" && (
+          <button
+            className="button secondary small"
+            onClick={() =>
+              shared.form(
+                "Issue invoice",
+                [reason],
+                `/invoices/${invoice.id}`,
+                { lifecycle: "issued" },
+                "PATCH",
+              )
+            }
+          >
+            Issue invoice
+          </button>
+        )}
+      {shared.canEdit &&
+        permitted(shared, "finance.invoice.update") &&
         !supplier &&
         invoice.lifecycle !== "cancelled" &&
         BigInt(invoice.paid) === 0n &&
@@ -438,23 +458,25 @@ export function InvoiceActions({
                 {p.date} · {p.reference} · SLE {shared.money(p.amount)}
                 {p.correction_reason && ` · Corrected: ${p.correction_reason}`}
               </p>
-              {shared.canEdit && !p.correction_reason && (
-                <button
-                  className="button secondary small"
-                  onClick={() =>
-                    shared.form(
-                      "Correct payment allocation",
-                      [reason],
-                      `/${supplier ? "supplier-allocations" : "allocations"}/${p.id}/correct`,
-                      {},
-                      "POST",
-                      "Retains the original allocation and records its correction. This does not reverse the underlying receipt.",
-                    )
-                  }
-                >
-                  Correct allocation
-                </button>
-              )}
+              {shared.canEdit &&
+                permitted(shared, "finance.allocation.correct") &&
+                !p.correction_reason && (
+                  <button
+                    className="button secondary small"
+                    onClick={() =>
+                      shared.form(
+                        "Correct payment allocation",
+                        [reason],
+                        `/${supplier ? "supplier-allocations" : "allocations"}/${p.id}/correct`,
+                        {},
+                        "POST",
+                        "Retains the original allocation and records its correction. This does not reverse the underlying receipt.",
+                      )
+                    }
+                  >
+                    Correct allocation
+                  </button>
+                )}
             </div>
           ))}
         </div>
@@ -499,6 +521,7 @@ export function ItemisedInvoice({
     <details className="itemised-invoice">
       <summary>Create an itemised invoice</summary>
       <form
+        className="finbiz-form"
         onChange={() => setDirty(true)}
         aria-busy={busy}
         onSubmit={async (e) => {
@@ -657,42 +680,43 @@ export function SupplierBills({
           <h2>Supplier bills & payments</h2>
           <p>Payables are separate from approved cash outflows.</p>
         </CardTitle>
-        {shared.canEdit && (
-          <button
-            className="button small"
-            onClick={() =>
-              shared.form(
-                "Record supplier bill",
-                [
-                  { name: "number", label: "Bill number" },
-                  {
-                    name: "contact_id",
-                    label: "Supplier",
-                    options: contacts
-                      .filter((c) => c.type === "supplier" && c.active)
-                      .map((c) => ({ value: c.id, label: c.name })),
-                  },
-                  {
-                    name: "issued",
-                    label: "Issue date",
-                    type: "date",
-                    value: new Date().toISOString().slice(0, 10),
-                  },
-                  { name: "due", label: "Due date", type: "date" },
-                  { name: "amount", label: "Amount (SLE)", type: "number" },
-                  {
-                    name: "description",
-                    label: "Description",
-                    type: "textarea",
-                  },
-                ],
-                "/supplier-bills",
-              )
-            }
-          >
-            Record bill
-          </button>
-        )}
+        {shared.canEdit &&
+          permitted(shared, "finance.supplier_bill.create") && (
+            <button
+              className="button small"
+              onClick={() =>
+                shared.form(
+                  "Record supplier bill",
+                  [
+                    { name: "number", label: "Bill number" },
+                    {
+                      name: "contact_id",
+                      label: "Supplier",
+                      options: contacts
+                        .filter((c) => c.type === "supplier" && c.active)
+                        .map((c) => ({ value: c.id, label: c.name })),
+                    },
+                    {
+                      name: "issued",
+                      label: "Issue date",
+                      type: "date",
+                      value: new Date().toISOString().slice(0, 10),
+                    },
+                    { name: "due", label: "Due date", type: "date" },
+                    { name: "amount", label: "Amount (SLE)", type: "number" },
+                    {
+                      name: "description",
+                      label: "Description",
+                      type: "textarea",
+                    },
+                  ],
+                  "/supplier-bills",
+                )
+              }
+            >
+              Record bill
+            </button>
+          )}
       </div>
       <div
         className="table-scroll"
@@ -727,33 +751,35 @@ export function SupplierBills({
                 </td>
                 {
                   <td>
-                    {shared.canEdit && BigInt(b.outstanding) > 0n && (
-                      <button
-                        className="button secondary small"
-                        onClick={() =>
-                          shared.form(
-                            "Allocate approved supplier payment",
-                            [
-                              {
-                                name: "transaction_id",
-                                label: "Approved payment internal ID",
-                              },
-                              {
-                                name: "amount",
-                                label: "Amount to allocate (SLE)",
-                                type: "number",
-                              },
-                            ],
-                            `/supplier-bills/${b.id}/allocate`,
-                            {},
-                            "POST",
-                            "Use an independently approved outgoing transaction for the same supplier.",
-                          )
-                        }
-                      >
-                        Allocate payment
-                      </button>
-                    )}
+                    {shared.canEdit &&
+                      permitted(shared, "finance.supplier_bill.allocate") &&
+                      BigInt(b.outstanding) > 0n && (
+                        <button
+                          className="button secondary small"
+                          onClick={() =>
+                            shared.form(
+                              "Allocate approved supplier payment",
+                              [
+                                {
+                                  name: "transaction_id",
+                                  label: "Approved payment internal ID",
+                                },
+                                {
+                                  name: "amount",
+                                  label: "Amount to allocate (SLE)",
+                                  type: "number",
+                                },
+                              ],
+                              `/supplier-bills/${b.id}/allocate`,
+                              {},
+                              "POST",
+                              "Use an independently approved outgoing transaction for the same supplier.",
+                            )
+                          }
+                        >
+                          Allocate payment
+                        </button>
+                      )}
                     <InvoiceActions {...shared} invoice={b} supplier />
                   </td>
                 }
@@ -897,7 +923,10 @@ export function ExceptionQueue({ data, ...shared }: Shared & { data: Row[] }) {
               <th>Evidence / issue</th>
               <th>Amount</th>
               <th>Status / review</th>
-              {shared.canEdit && <th>Action</th>}
+              {shared.canEdit &&
+                permitted(shared, "finance.exception.review") && (
+                  <th>Action</th>
+                )}
             </tr>
           </thead>
           <tbody>
@@ -921,41 +950,42 @@ export function ExceptionQueue({ data, ...shared }: Shared & { data: Row[] }) {
                     </small>
                   )}
                 </td>
-                {shared.canEdit && (
-                  <td>
-                    <button
-                      className="button secondary small"
-                      onClick={() =>
-                        shared.form(
-                          "Record exception investigation",
-                          [reason],
-                          "/exceptions/review",
-                          { key: e.key, status: "in_review" },
-                        )
-                      }
-                    >
-                      Investigate
-                    </button>
-                    {shared.role === "manager" &&
-                      ["duplicate", "invalid_statement"].includes(e.type) && (
-                        <button
-                          className="button secondary small"
-                          onClick={() =>
-                            shared.form(
-                              "Dismiss reviewed non-posting exception",
-                              [reason],
-                              "/exceptions/review",
-                              { key: e.key, status: "dismissed" },
-                              "POST",
-                              "The original evidence remains retained. No transaction is written off or removed.",
-                            )
-                          }
-                        >
-                          Dismiss with reason
-                        </button>
-                      )}
-                  </td>
-                )}
+                {shared.canEdit &&
+                  permitted(shared, "finance.exception.review") && (
+                    <td>
+                      <button
+                        className="button secondary small"
+                        onClick={() =>
+                          shared.form(
+                            "Record exception investigation",
+                            [reason],
+                            "/exceptions/review",
+                            { key: e.key, status: "in_review" },
+                          )
+                        }
+                      >
+                        Investigate
+                      </button>
+                      {shared.role === "manager" &&
+                        ["duplicate", "invalid_statement"].includes(e.type) && (
+                          <button
+                            className="button secondary small"
+                            onClick={() =>
+                              shared.form(
+                                "Dismiss reviewed non-posting exception",
+                                [reason],
+                                "/exceptions/review",
+                                { key: e.key, status: "dismissed" },
+                                "POST",
+                                "The original evidence remains retained. No transaction is written off or removed.",
+                              )
+                            }
+                          >
+                            Dismiss with reason
+                          </button>
+                        )}
+                    </td>
+                  )}
               </tr>
             ))}
           </tbody>
@@ -1029,19 +1059,20 @@ export function AdvancedReconciliation(shared: Shared) {
             matches require balanced totals and a different manager’s approval.
           </p>
         </CardTitle>
-        {shared.canEdit && (
-          <button
-            className="button small"
-            onClick={() => setComposing(!composing)}
-          >
-            Propose match / group
-          </button>
-        )}
+        {shared.canEdit &&
+          permitted(shared, "finance.reconciliation.execute") && (
+            <button
+              className="button small"
+              onClick={() => setComposing(!composing)}
+            >
+              Propose match / group
+            </button>
+          )}
       </div>
       <ErrorNotice error={error} />
       {composing && state && (
         <form
-          className="group-proposal-form"
+          className="group-proposal-form finbiz-form"
           onSubmit={async (event) => {
             event.preventDefault();
             if (saving) return;
@@ -1223,34 +1254,35 @@ export function AdvancedReconciliation(shared: Shared) {
             Tolerance: {state.policy.date_days} days · SLE{" "}
             {shared.money(state.policy.amount_minor)}. Amount tolerance produces
             suggestions only; a difference cannot be silently confirmed.
-            {shared.role === "manager" && (
-              <button
-                className="button secondary small"
-                onClick={() =>
-                  shared.form(
-                    "Configure matching tolerances",
-                    [
-                      {
-                        name: "date_days",
-                        label: "Date tolerance (whole days, 0–7)",
-                        value: String(state.policy.date_days),
-                      },
-                      {
-                        name: "amount_minor",
-                        label: "Amount tolerance (minor units, 0–100000)",
-                        value: String(state.policy.amount_minor),
-                      },
-                      reason,
-                    ],
-                    "/reconciliation/policy",
-                    {},
-                    "PATCH",
-                  )
-                }
-              >
-                Edit matching policy
-              </button>
-            )}
+            {shared.role === "manager" &&
+              permitted(shared, "finance.reconciliation.configure") && (
+                <button
+                  className="button secondary small"
+                  onClick={() =>
+                    shared.form(
+                      "Configure matching tolerances",
+                      [
+                        {
+                          name: "date_days",
+                          label: "Date tolerance (whole days, 0–7)",
+                          value: String(state.policy.date_days),
+                        },
+                        {
+                          name: "amount_minor",
+                          label: "Amount tolerance (minor units, 0–100000)",
+                          value: String(state.policy.amount_minor),
+                        },
+                        reason,
+                      ],
+                      "/reconciliation/policy",
+                      {},
+                      "PATCH",
+                    )
+                  }
+                >
+                  Edit matching policy
+                </button>
+              )}
           </div>
           <details className="enhancement-history">
             <summary>
@@ -1295,7 +1327,12 @@ export function AdvancedReconciliation(shared: Shared) {
                   <tr key={p.id}>
                     <td>
                       {p.created_at}
-                      <small>{p.requester}</small>
+                      <small>
+                        <UserIdentity
+                          name={p.requester}
+                          src={p.requester_image_url}
+                        />
+                      </small>
                     </td>
                     <td>
                       {p.transaction_ids.length} transactions /{" "}
@@ -1315,6 +1352,7 @@ export function AdvancedReconciliation(shared: Shared) {
                     </td>
                     <td>
                       {shared.role === "manager" &&
+                        permitted(shared, "finance.reconciliation.confirm") &&
                         p.status === "pending" &&
                         p.user_id !== shared.userId && (
                           <div className="enhancement-actions">
@@ -1336,20 +1374,22 @@ export function AdvancedReconciliation(shared: Shared) {
                             ))}
                           </div>
                         )}
-                      {shared.canEdit && p.status === "approved" && (
-                        <button
-                          className="button secondary small"
-                          onClick={() =>
-                            shared.form(
-                              "Undo grouped reconciliation",
-                              [reason],
-                              `/reconciliation/${p.mode === "partial" ? "partial-proposals" : "proposals"}/${p.id}/undo`,
-                            )
-                          }
-                        >
-                          Undo group
-                        </button>
-                      )}
+                      {shared.canEdit &&
+                        permitted(shared, "finance.reconciliation.undo") &&
+                        p.status === "approved" && (
+                          <button
+                            className="button secondary small"
+                            onClick={() =>
+                              shared.form(
+                                "Undo grouped reconciliation",
+                                [reason],
+                                `/reconciliation/${p.mode === "partial" ? "partial-proposals" : "proposals"}/${p.id}/undo`,
+                              )
+                            }
+                          >
+                            Undo group
+                          </button>
+                        )}
                     </td>
                   </tr>
                 ))}
@@ -1632,7 +1672,12 @@ export function ReportCentre({
               className="button secondary small"
               href={`/api/reports/download?${params}&kind=${kind}&report_status=${encodeURIComponent(reportStatus)}&format=${format}`}
             >
-              <Download size={15} />
+              <Download
+                size={15}
+                aria-hidden="true"
+                focusable="false"
+                className="icon-download"
+              />
               {format.toUpperCase()}
             </a>
           ))}
@@ -1696,7 +1741,7 @@ export function ReferenceCategories({
         <CardTitle icon={FileText}>
           <h2>Income & expense categories</h2>
         </CardTitle>
-        {shared.canEdit && (
+        {shared.canEdit && permitted(shared, "finance.category.create") && (
           <button
             className="button small"
             onClick={() =>
@@ -1728,7 +1773,7 @@ export function ReferenceCategories({
             <span>
               {c.name} · {c.direction} · {c.active ? "Active" : "Inactive"}
             </span>
-            {shared.canEdit && (
+            {shared.canEdit && permitted(shared, "finance.category.update") && (
               <button
                 className="button secondary small"
                 onClick={() =>
@@ -1769,7 +1814,7 @@ export function ApprovalPolicy(shared: Shared) {
             explicit delegation. Nobody can approve their own payment.
           </p>
         </CardTitle>
-        {state && (
+        {state && permitted(shared, "finance.approval_policy.configure") && (
           <button
             className="button small"
             onClick={() =>
@@ -1930,7 +1975,7 @@ export function ControlRequests({
         </CardTitle>
       </div>
       <ErrorNotice error={error} />
-      {shared.canEdit && (
+      {shared.canEdit && permitted(shared, "finance.control.create") && (
         <div className="enhancement-toolbar">
           <label>
             Request type
@@ -1978,7 +2023,11 @@ export function ControlRequests({
                 <td>
                   {r.kind.replaceAll("_", " ")}
                   <small>
-                    {r.requester} � {r.created_at}
+                    <UserIdentity
+                      name={r.requester}
+                      src={r.requester_image_url}
+                    />{" "}
+                    � {r.created_at}
                   </small>
                 </td>
                 <td>
@@ -1995,6 +2044,7 @@ export function ControlRequests({
                 </td>
                 <td>
                   {shared.role === "manager" &&
+                  permitted(shared, "finance.control.approve") &&
                   r.status === "pending" &&
                   r.user_id !== shared.userId ? (
                     <div className="enhancement-actions">

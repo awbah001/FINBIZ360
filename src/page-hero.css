@@ -1,4 +1,40 @@
 /* Hero presentation belongs here; operational panels keep their neutral surfaces. */
+.reference-workspace .module-hero.module-hero-compact {
+  min-height: 124px;
+  padding: 18px 24px;
+  margin-bottom: 14px;
+  gap: 12px 20px;
+}
+.module-hero-compact .page-heading-identity {
+  padding-right: 165px;
+  gap: 14px;
+}
+.module-hero-compact .page-heading-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+.module-hero-compact .module-hero-art {
+  width: 160px;
+  height: 114px;
+}
+@media (min-width: 701px) and (max-width: 1400px) {
+  .reference-workspace .module-hero.module-hero-compact {
+    padding-right: 185px;
+  }
+  .module-hero-compact .page-heading-identity {
+    padding-right: 0;
+  }
+}
+@media (max-width: 700px) {
+  .reference-workspace .module-hero.module-hero-compact {
+    min-height: 0;
+    padding: 16px;
+  }
+  .module-hero-compact .page-heading-identity {
+    padding-right: 0;
+  }
+}
 .reference-workspace .module-hero {
   position: relative;
   isolation: isolate;
@@ -11,7 +47,7 @@
   background:
     var(
       --hero-pattern,
-      linear-gradient(120deg, transparent 60%, #ffffff70 60%)
+      linear-gradient(120deg, transparent 60%, rgba(255, 255, 255, 0.44) 60%)
     ),
     linear-gradient(
       110deg,

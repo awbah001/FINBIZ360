@@ -17,16 +17,17 @@
     "format": "prettier --write src server scripts tests docs vite.config.ts tsconfig.json package.json README.md",
     "format:check": "prettier --check src server scripts tests docs vite.config.ts tsconfig.json package.json README.md",
     "restore": "node server/restore.js",
+    "restore:encrypted": "node scripts/restore-encrypted.mjs",
     "benchmark": "node scripts/benchmark.mjs"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@phosphor-icons/react": "^2.1.10",
     "csv-parse": "^6.1.0",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
-    "lucide-react": "^0.468.0",
     "multer": "^2.0.2",
     "pdfkit": "^0.17.2",
     "react": "^19.2.0",

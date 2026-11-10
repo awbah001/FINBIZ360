@@ -1,0 +1,55 @@
+/* Keep comparison columns readable; reveal occasional actions on demand. */
+.reference-workspace .invoice-register {
+  min-width: 700px;
+  width: 100%;
+}
+.reference-workspace .invoice-register :is(th, td) {
+  padding: 14px 12px;
+}
+.invoice-register :is(th, .invoice-date, .invoice-money) {
+  white-space: nowrap;
+}
+.invoice-register .invoice-money {
+  font-variant-numeric: tabular-nums;
+}
+.invoice-register td:first-child {
+  min-width: 145px;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+}
+.invoice-register td:last-child {
+  min-width: 145px;
+}
+.invoice-register td {
+  vertical-align: top;
+}
+.invoice-record-details > summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 8px 0;
+  color: var(--primary);
+  font-size: var(--text-small);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.invoice-detail-summary {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0;
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+.invoice-register .invoice-actions {
+  min-width: 0;
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.invoice-register .allocation-history {
+  min-width: 0;
+}
+@media (pointer: coarse) {
+  .invoice-record-details > summary {
+    min-height: 44px;
+  }
+}

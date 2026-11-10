@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { migrateOperations } from "./operations-schema.js";
 import {
   randomUUID,
   randomBytes,
@@ -8,6 +9,7 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 
+export const SCHEMA_VERSION = 11;
 export const id = () => randomUUID();
 export function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
@@ -189,5 +191,82 @@ export function openDb(
     `),
     );
   }
+  if (!db.prepare("SELECT 1 FROM migrations WHERE version=8").get()) {
+    atomic(db, () =>
+      db.exec(`
+      CREATE TABLE profile_images (
+        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        image BLOB NOT NULL,
+        revision TEXT NOT NULL
+      );
+      INSERT INTO migrations(version) VALUES (8);
+    `),
+    );
+  }
+  if (!db.prepare("SELECT 1 FROM migrations WHERE version=9").get()) {
+    atomic(db, () =>
+      db.exec(`
+      CREATE TABLE access_roles (
+        id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE,
+        base_role TEXT NOT NULL CHECK(base_role IN ('manager','finance','cashier','auditor')),
+        permissions TEXT NOT NULL CHECK(json_valid(permissions)),
+        created_by TEXT NOT NULL REFERENCES users(id),
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE user_access_roles (
+        user_id TEXT PRIMARY KEY REFERENCES users(id),
+        access_role_id TEXT NOT NULL REFERENCES access_roles(id)
+      );
+      CREATE TABLE invoice_assignments (
+        invoice_id TEXT PRIMARY KEY REFERENCES invoices(id),
+        user_id TEXT NOT NULL REFERENCES users(id),
+        assigned_by TEXT NOT NULL REFERENCES users(id),
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+      INSERT INTO migrations(version) VALUES (9);
+      CREATE TABLE approval_limits (
+        user_id TEXT PRIMARY KEY REFERENCES users(id),
+        max_amount INTEGER NOT NULL CHECK(typeof(max_amount)='integer' AND max_amount>=0),
+        changed_by TEXT NOT NULL REFERENCES users(id), reason TEXT NOT NULL,
+        changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `),
+    );
+  }
+  if (!db.prepare("SELECT 1 FROM migrations WHERE version=10").get()) {
+    // Rebuild without changing allocation IDs or their correction references.
+    // Uniqueness applies to active allocations, so a corrected pair can be reused.
+    db.exec("PRAGMA foreign_keys=OFF");
+    try {
+      atomic(db, () => {
+        db.exec(`
+          CREATE TABLE payment_allocations_new (id TEXT PRIMARY KEY, invoice_id TEXT NOT NULL REFERENCES invoices(id), transaction_id TEXT NOT NULL REFERENCES transactions(id), amount INTEGER NOT NULL CHECK(typeof(amount)='integer' AND amount>0));
+          INSERT INTO payment_allocations_new SELECT * FROM payment_allocations;
+          DROP TABLE payment_allocations;
+          ALTER TABLE payment_allocations_new RENAME TO payment_allocations;
+          CREATE INDEX payment_allocation_pair ON payment_allocations(invoice_id,transaction_id);
+          CREATE TRIGGER one_active_invoice_allocation BEFORE INSERT ON payment_allocations
+          WHEN EXISTS (SELECT 1 FROM payment_allocations p WHERE p.invoice_id=NEW.invoice_id AND p.transaction_id=NEW.transaction_id AND NOT EXISTS (SELECT 1 FROM allocation_corrections c WHERE c.allocation_id=p.id))
+          BEGIN SELECT RAISE(ABORT,'Receipt already allocated to this invoice; correct the existing allocation first'); END;
+          CREATE TABLE supplier_allocations_new (id TEXT PRIMARY KEY, bill_id TEXT NOT NULL REFERENCES supplier_bills(id), transaction_id TEXT NOT NULL REFERENCES transactions(id), amount INTEGER NOT NULL CHECK(typeof(amount)='integer' AND amount>0));
+          INSERT INTO supplier_allocations_new SELECT * FROM supplier_allocations;
+          DROP TABLE supplier_allocations;
+          ALTER TABLE supplier_allocations_new RENAME TO supplier_allocations;
+          CREATE INDEX supplier_allocation_pair ON supplier_allocations(bill_id,transaction_id);
+          CREATE TRIGGER one_active_supplier_allocation BEFORE INSERT ON supplier_allocations
+          WHEN EXISTS (SELECT 1 FROM supplier_allocations p WHERE p.bill_id=NEW.bill_id AND p.transaction_id=NEW.transaction_id AND NOT EXISTS (SELECT 1 FROM supplier_allocation_corrections c WHERE c.allocation_id=p.id))
+          BEGIN SELECT RAISE(ABORT,'Payment already allocated to this bill; correct the existing allocation first'); END;
+          INSERT INTO migrations(version) VALUES (10);
+        `);
+        if (db.prepare("PRAGMA foreign_key_check").all().length)
+          throw new Error(
+            "Allocation migration failed foreign-key validation.",
+          );
+      });
+    } finally {
+      db.exec("PRAGMA foreign_keys=ON");
+    }
+  }
+  migrateOperations(db);
   return db;
 }

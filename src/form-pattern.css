@@ -1,0 +1,301 @@
+/* Form pattern adapted from Uiverse.io by mahbowal.
+   Teal brand, responsive business-form widths, labels and validation are retained. */
+:root {
+  --form-surface: linear-gradient(0deg, #fff 0%, #f4f7fb 100%);
+  --form-field-shadow: 0 10px 10px -5px
+    color-mix(in srgb, var(--primary) 17%, #e7f7fa);
+  --form-surface-shadow: 0 30px 30px -20px
+    color-mix(in srgb, var(--primary) 42%, transparent);
+}
+
+.finbiz-form {
+  min-width: 0;
+  max-width: 100%;
+  background: var(--form-surface);
+  border: 5px solid white;
+  border-radius: 32px;
+  padding: 24px;
+  margin-top: 20px;
+  box-shadow: var(--form-surface-shadow);
+}
+.finbiz-form :is(label, .field-label) {
+  line-height: 1.6;
+}
+.finbiz-form .form-grid {
+  row-gap: 22px;
+}
+.finbiz-form .field-help {
+  color: var(--muted);
+}
+
+/* The dialog and authentication wrapper provide the container for their forms. */
+.overlay .modal:has(> .finbiz-form-modal),
+.auth-page .auth-form-wrap:has(> .finbiz-form-auth) {
+  background: var(--form-surface);
+  border: 5px solid white;
+  border-radius: 40px;
+  box-shadow: var(--form-surface-shadow), var(--card-shadow);
+}
+.auth-page .auth-form-wrap:has(> .finbiz-form-auth) {
+  padding: clamp(18px, 2.2vw, 30px);
+}
+.finbiz-form-auth,
+.finbiz-form-modal {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.auth-page .auth-heading {
+  text-align: center;
+}
+.auth-page .auth-heading h2 {
+  color: var(--primary);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+}
+.auth-page .auth-heading p {
+  margin-inline: auto;
+}
+.overlay .modal:has(> .finbiz-form-modal) .modal-head {
+  background: transparent;
+}
+.overlay .modal:has(> .finbiz-form-modal) .modal-head > div {
+  flex: 1;
+  text-align: center;
+}
+.overlay .modal:has(> .finbiz-form-modal) .modal-head h2 {
+  color: var(--primary);
+  font-weight: 850;
+}
+.finbiz-form-modal .modal-footer {
+  background: transparent;
+}
+
+/* Wrapped fields receive one raised surface, rather than two nested shadows. */
+.auth-page .finbiz-form .input-container,
+.reference-workspace .finbiz-form .input-container,
+.reference-workspace .filter-bar .input-container {
+  background: white;
+  border: 0;
+  border-inline: 2px solid transparent;
+  border-radius: 20px;
+  box-shadow: var(--form-field-shadow);
+  overflow: visible;
+  transition:
+    border-color 180ms,
+    box-shadow 180ms,
+    background-color 180ms;
+}
+.auth-page .finbiz-form .input-container > .input,
+.reference-workspace .finbiz-form .input-container > .input,
+.reference-workspace .filter-bar .input-container > .input {
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: none;
+  padding: 13px 18px;
+  min-height: 48px;
+}
+.auth-page .finbiz-form .auth-input.input-container {
+  padding-inline: 14px;
+}
+.auth-page .finbiz-form .auth-input.input-container > .input {
+  padding-inline: 0;
+}
+.finbiz-form .input-container > .highlight {
+  display: none;
+}
+.auth-page .finbiz-form .input-container:hover,
+.reference-workspace .finbiz-form .input-container:hover {
+  background: #fff;
+}
+.auth-page .finbiz-form .input-container:focus-within,
+.reference-workspace .finbiz-form .input-container:focus-within,
+.reference-workspace .filter-bar .input-container:focus-within {
+  border-inline-color: var(--brand-start);
+  background: white;
+  outline: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  outline-offset: 3px;
+  box-shadow: var(--form-field-shadow);
+}
+
+/* Standalone selects, textareas, amount/date and itemised-invoice controls. */
+.finbiz-form
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(
+        [type="file"]
+      ):not([type="submit"]):not([type="button"]):not([type="range"]),
+    select,
+    textarea
+  ):not(.input-container > *) {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  background: white;
+  border: 0;
+  border-inline: 2px solid transparent;
+  border-radius: 20px;
+  padding: 13px 18px;
+  box-shadow: var(--form-field-shadow);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-input);
+  transition:
+    border-color 180ms,
+    box-shadow 180ms;
+}
+.reference-workspace
+  :is(.filter-bar, .calendar-range-fields, .panel-header)
+  > label
+  > :is(select.input, input.input) {
+  background: white;
+  border-inline: 2px solid transparent;
+  border-radius: 18px;
+  box-shadow: var(--form-field-shadow);
+}
+.finbiz-form :is(input, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.finbiz-form :is(input, select, textarea):focus-visible {
+  border-inline-color: var(--brand-start);
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+.finbiz-form .input-container > .input:focus-visible {
+  outline: none;
+}
+.finbiz-form textarea.input {
+  min-height: 112px;
+  resize: vertical;
+}
+.finbiz-form input[type="file"] {
+  max-width: 100%;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: white;
+  box-shadow: var(--form-field-shadow);
+}
+.finbiz-form input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-right: 12px;
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Keep application validation stronger than decorative focus borders. */
+.auth-page .finbiz-form .input-container:has([aria-invalid="true"]),
+.reference-workspace .finbiz-form .input-container:has([aria-invalid="true"]) {
+  border-inline-color: var(--danger);
+  box-shadow:
+    0 0 0 2px var(--danger-soft),
+    var(--form-field-shadow);
+}
+.finbiz-form [aria-invalid="true"]:focus-visible {
+  outline-color: var(--danger);
+}
+.finbiz-form .input-container:has([aria-invalid="true"]):focus-within {
+  outline-color: var(--danger);
+}
+.finbiz-form :is(input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+.finbiz-form .input-container:has(> .input:disabled) {
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+/* Adapt the sample's submit treatment without widening multi-action toolbars. */
+:is(.auth-page, .reference-workspace)
+  .finbiz-form
+  .button:not(.secondary):not(.danger) {
+  background: linear-gradient(45deg, var(--primary), var(--brand-start));
+  border: 0;
+  border-radius: 20px;
+  font-weight: 750;
+  color: white;
+  box-shadow: 0 20px 10px -15px
+    color-mix(in srgb, var(--primary) 52%, transparent);
+  transition:
+    transform 180ms,
+    box-shadow 180ms,
+    background-color 180ms;
+}
+.auth-page .finbiz-form .auth-submit {
+  width: 100%;
+  min-height: 48px;
+}
+:is(.auth-page, .reference-workspace)
+  .finbiz-form
+  .button:not(.secondary):not(.danger):not(:disabled):hover {
+  transform: scale(1.015);
+  box-shadow: 0 23px 12px -18px
+    color-mix(in srgb, var(--primary) 58%, transparent);
+}
+:is(.auth-page, .reference-workspace)
+  .finbiz-form
+  .button:not(.secondary):not(.danger):not(:disabled):active {
+  transform: scale(0.985);
+  box-shadow: 0 15px 10px -12px
+    color-mix(in srgb, var(--primary) 45%, transparent);
+}
+:is(.auth-page, .reference-workspace) .finbiz-form .button:disabled {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 600px) {
+  .finbiz-form {
+    padding: 18px 14px;
+    border-width: 3px;
+    border-radius: 26px;
+  }
+  .finbiz-form-auth,
+  .finbiz-form-modal {
+    padding: 0;
+    border: 0;
+  }
+  .auth-page .auth-form-wrap:has(> .finbiz-form-auth) {
+    padding: 18px;
+    border-width: 3px;
+    border-radius: 28px;
+  }
+  .overlay .modal:has(> .finbiz-form-modal) {
+    border-width: 3px;
+    border-radius: 28px;
+  }
+  .finbiz-form .form-grid {
+    row-gap: 18px;
+  }
+  .finbiz-form :is(input, select, textarea) {
+    font-size: 16px;
+  }
+}
+@media (max-height: 780px) and (min-width: 761px) {
+  .auth-login .auth-form-wrap:has(> .finbiz-form-auth) {
+    padding: 16px 22px;
+  }
+  .auth-login .finbiz-form {
+    margin-top: 14px;
+  }
+  .auth-login .finbiz-form .auth-input.input-container {
+    margin-bottom: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .finbiz-form :is(.input-container, input, select, textarea, .button) {
+    transition: none;
+  }
+  :is(.auth-page, .reference-workspace)
+    .finbiz-form
+    .button:not(.secondary):not(.danger):not(:disabled):is(:hover, :active) {
+    transform: none;
+  }
+}

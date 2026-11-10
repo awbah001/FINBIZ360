@@ -1,23 +1,35 @@
+import BrandLogo from "./BrandLogo";
+import SystemIcon from "./SystemIcon";
+import LandingNav, { type LandingNavItem } from "./LandingNav";
 import {
   ArrowRight,
   ArrowDown,
-  ArrowLeftRight,
-  Banknote,
-  Building2,
-  ChartNoAxesCombined,
+  ArrowsLeftRight as ArrowLeftRight,
+  Money as Banknote,
+  BuildingOffice as Building2,
+  ChartLineUp as ChartNoAxesCombined,
   Check,
-  CheckCheck,
+  Checks as CheckCheck,
   FileText,
-  GitCompareArrows,
-  History,
+  ArrowsCounterClockwise as GitCompareArrows,
+  ClipboardText as History,
+  Question as HelpCircle,
+  Stack as Layers,
+  FlowArrow as Workflow,
   Plus,
-  Landmark,
-  LockKeyhole,
+  Bank as Landmark,
+  LockKey as LockKeyhole,
   ShieldCheck,
-  Smartphone,
+  DeviceMobile as Smartphone,
   Users,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import "./home.css";
+
+const navigationItems: LandingNavItem[] = [
+  { name: "Features", url: "#features", icon: Layers },
+  { name: "How it works", url: "#how-it-works", icon: Workflow },
+  { name: "Questions", url: "#questions", icon: HelpCircle },
+];
 
 export default function Home() {
   const entry = "/login";
@@ -74,18 +86,14 @@ export default function Home() {
       <header className="home-header">
         <a href="/" className="brand" aria-label="FinBiz 360 home">
           <span className="brand-icon">
-            <ChartNoAxesCombined size={24} />
+            <BrandLogo />
           </span>
           FinBiz <strong>360</strong>
         </a>
-        <nav aria-label="Main navigation">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#questions">Questions</a>
-        </nav>
+        <LandingNav items={navigationItems} />
         <a className="button home-entry small" href={entry}>
           Sign in
-          <ArrowRight size={14} />
+          <ArrowRight size={14} aria-hidden="true" focusable="false" />
         </a>
       </header>
       <main className="home-main" id="home-content">
@@ -110,24 +118,39 @@ export default function Home() {
             <div className="home-hero-actions">
               <a className="button" href={entry}>
                 {action}
-                <ArrowRight size={17} />
+                <ArrowRight size={17} aria-hidden="true" focusable="false" />
               </a>
               <a className="home-how-link" href="#how-it-works">
                 See how it works
-                <ArrowDown size={15} />
+                <ArrowDown size={15} aria-hidden="true" focusable="false" />
               </a>
             </div>
             <div className="home-trust">
               <span>
-                <Check size={13} />
+                <Check
+                  size={13}
+                  aria-hidden="true"
+                  focusable="false"
+                  className="icon-check"
+                />
                 Your company records
               </span>
               <span>
-                <Check size={13} />
+                <Check
+                  size={13}
+                  aria-hidden="true"
+                  focusable="false"
+                  className="icon-check"
+                />
                 Clear role permissions
               </span>
               <span>
-                <Check size={13} />
+                <Check
+                  size={13}
+                  aria-hidden="true"
+                  focusable="false"
+                  className="icon-check"
+                />
                 SLE currency
               </span>
             </div>
@@ -146,13 +169,17 @@ export default function Home() {
                   <i />
                 </div>
                 <span>
-                  <LockKeyhole size={11} />
+                  <LockKeyhole size={11} aria-hidden="true" focusable="false" />
                   Your financial workspace
                 </span>
               </div>
               <div className="home-window-heading">
                 <span className="home-workspace-mark">
-                  <ChartNoAxesCombined size={23} />
+                  <ChartNoAxesCombined
+                    size={23}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
                 </span>
                 <div>
                   <strong>Clarity starts here.</strong>
@@ -161,22 +188,26 @@ export default function Home() {
               </div>
               <div className="home-channel-row">
                 <span>
-                  <Banknote size={17} />
+                  <Banknote size={17} aria-hidden="true" focusable="false" />
                   Cash
                 </span>
                 <span>
-                  <Smartphone size={17} />
+                  <Smartphone size={17} aria-hidden="true" focusable="false" />
                   Mobile money
                 </span>
                 <span>
-                  <Landmark size={17} />
+                  <Landmark size={17} aria-hidden="true" focusable="false" />
                   Bank
                 </span>
               </div>
               <div className="home-workflow-preview">
                 <div>
                   <span className="home-step-icon">
-                    <ArrowLeftRight size={19} />
+                    <ArrowLeftRight
+                      size={19}
+                      aria-hidden="true"
+                      focusable="false"
+                    />
                   </span>
                   <section>
                     <strong>Record your activity</strong>
@@ -186,7 +217,11 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="home-step-icon">
-                    <ShieldCheck size={19} />
+                    <ShieldCheck
+                      size={19}
+                      aria-hidden="true"
+                      focusable="false"
+                    />
                   </span>
                   <section>
                     <strong>Review with confidence</strong>
@@ -196,7 +231,12 @@ export default function Home() {
                 </div>
                 <div>
                   <span className="home-step-icon">
-                    <CheckCheck size={19} />
+                    <CheckCheck
+                      size={19}
+                      aria-hidden="true"
+                      focusable="false"
+                      className="icon-checks"
+                    />
                   </span>
                   <section>
                     <strong>Bring records into balance</strong>
@@ -212,7 +252,11 @@ export default function Home() {
             </div>
             <div className="home-floating-note">
               <span>
-                <GitCompareArrows size={20} />
+                <GitCompareArrows
+                  size={20}
+                  aria-hidden="true"
+                  focusable="false"
+                />
               </span>
               <div>
                 <strong>Evidence meets insight.</strong>
@@ -225,23 +269,28 @@ export default function Home() {
           <span>ONE WORKSPACE FOR YOUR TEAM</span>
           <div>
             <span>
-              <Building2 size={15} />
+              <Building2 size={15} aria-hidden="true" focusable="false" />
               Management
             </span>
             <span>
-              <FileText size={15} />
+              <FileText
+                size={15}
+                aria-hidden="true"
+                focusable="false"
+                className="icon-file-text"
+              />
               Finance
             </span>
             <span>
-              <Users size={15} />
+              <Users size={15} aria-hidden="true" focusable="false" />
               Cashiers
             </span>
             <span>
-              <ShieldCheck size={15} />
+              <ShieldCheck size={15} aria-hidden="true" focusable="false" />
               Auditors
             </span>
             <span>
-              <LockKeyhole size={15} />
+              <LockKeyhole size={15} aria-hidden="true" focusable="false" />
               Administrators
             </span>
           </div>
@@ -266,9 +315,13 @@ export default function Home() {
           <div className="home-feature-grid">
             {features.map(({ icon: Icon, title, description, tone }) => (
               <article className={`effect-card tone-${tone}`} key={title}>
-                <span className="home-feature-icon">
-                  <Icon size={21} />
-                </span>
+                <SystemIcon
+                  icon={Icon}
+                  tone={tone}
+                  variant="shortcut"
+                  className="home-feature-icon"
+                  size={24}
+                />
                 <h3>{title}</h3>
                 <p>{description}</p>
               </article>
@@ -287,7 +340,7 @@ export default function Home() {
             </div>
             <a href={entry} className="home-how-link">
               Sign in
-              <ArrowRight size={15} />
+              <ArrowRight size={15} aria-hidden="true" focusable="false" />
             </a>
           </div>
           <ol className="home-process-grid">
@@ -344,7 +397,7 @@ export default function Home() {
               <details key={q}>
                 <summary>
                   {q}
-                  <Plus size={16} aria-hidden="true" />
+                  <Plus size={16} aria-hidden="true" focusable="false" />
                 </summary>
                 <p>{a}</p>
               </details>
@@ -363,21 +416,21 @@ export default function Home() {
           </div>
           <a className="button" href={entry}>
             {action}
-            <ArrowRight size={17} />
+            <ArrowRight size={17} aria-hidden="true" focusable="false" />
           </a>
         </section>
       </main>
       <footer className="home-footer">
         <a className="brand" href="/">
           <span className="brand-icon">
-            <ChartNoAxesCombined size={18} />
+            <BrandLogo />
           </span>
           FinBiz <strong>360</strong>
         </a>
         <p>Financial clarity for businesses in Sierra Leone.</p>
         <a href={entry}>
           Sign in
-          <ArrowRight size={13} />
+          <ArrowRight size={13} aria-hidden="true" focusable="false" />
         </a>
         <span>© {new Date().getFullYear()} FinBiz 360</span>
       </footer>

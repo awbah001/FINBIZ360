@@ -52,7 +52,7 @@ test("each role has a distinct workspace and all dashboard tasks lead to permitt
     await build({
       stdin: {
         contents:
-          "export {default as RoleDashboard} from './src/RoleDashboard.tsx'; export {default as Dashboard, WorkspaceTopbar} from './src/Dashboard.tsx'; export * from './src/roleWorkspace.ts';",
+          "export {default as RoleDashboard} from './src/RoleDashboard.tsx'; export {default as Dashboard, WorkspaceTopbar} from './src/Dashboard.tsx'; export * from './src/roleWorkspace.ts'; export * from './src/workspaceCatalogue.ts';",
         resolveDir: process.cwd(),
         loader: "tsx",
       },
@@ -61,7 +61,7 @@ test("each role has a distinct workspace and all dashboard tasks lead to permitt
       format: "esm",
       platform: "node",
       jsx: "automatic",
-      external: ["react", "react/*", "lucide-react"],
+      external: ["react", "react/*", "@phosphor-icons/react"],
       loader: { ".css": "empty" },
       logLevel: "silent",
     });
@@ -72,11 +72,18 @@ test("each role has a distinct workspace and all dashboard tasks lead to permitt
       canOpenPage,
       workspacePageFromSearch,
       workspacePageUrl,
+      workspaceCatalogue,
     } = await import(pathToFileURL(entry).href);
     assert.equal(
       new Set(Object.values(roleWorkspaces).map((w) => w.title)).size,
       5,
     );
+    assert.equal(workspaceCatalogue.length, 210);
+    for (const workflow of workspaceCatalogue) {
+      assert.ok(workflow.workflow && workflow.state, workflow.title);
+      if (workflow.page) assert.ok(canOpenPage(workflow.role, workflow.page), `${workflow.role}: ${workflow.title} -> ${workflow.page}`);
+    }
+    assert.equal(canOpenPage("finance", "Invoices", false, ["Overview"]), false);
     for (const [role, workspace] of Object.entries(roleWorkspaces)) {
       for (const task of workspace.tasks)
         assert.ok(canOpenPage(role, task.page));
@@ -127,8 +134,9 @@ test("each role has a distinct workspace and all dashboard tasks lead to permitt
     );
     assert.doesNotMatch(
       adminTopbar,
-      /Search transactions|Payment approvals|Account scope|header-date-controls/,
+      /Search transactions|Payment approvals|Account scope|calendar-range-fields/,
     );
+    assert.match(adminTopbar, /Workspace calendar/);
     assert.equal(canOpenPage("admin", "Transactions"), false);
     assert.equal(canOpenPage("admin", "Approvals"), false);
     assert.equal(canOpenPage("admin", "Approvals", true), true);

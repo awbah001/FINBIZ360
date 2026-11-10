@@ -1,5 +1,6 @@
 ﻿import { test } from "node:test";
 import { readFileSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
 import assert from "node:assert/strict";
 import request from "supertest";
 import { openDb, id } from "../server/db.js";
@@ -485,7 +486,12 @@ test("approval histories, audit filters and notifications are complete and scope
     );
     const adminNotice = (await clients.admin.agent.get("/api/notifications"))
       .body;
-    assert.ok(adminNotice.items.every((i) => i.page === "Audit trail"));
+    assert.ok(
+      adminNotice.items.every((i) =>
+        ["Audit trail", "System maintenance"].includes(i.page),
+      ),
+    );
+    assert.ok(adminNotice.items.some((i) => i.id === "backup:disabled"));
     assert.ok(
       !JSON.stringify(adminNotice).includes("Missing supporting evidence"),
     );
@@ -596,8 +602,19 @@ test("role changes and reactivation never revive old delegated approval authorit
 });
 
 test("version 7 rollback preserves users, financial records and immutable audit history", async () => {
-  const { db } = await setup();
+  const db = new DatabaseSync(":memory:");
   try {
+    // Exercise the historical v7 rollback from its original schema version.
+    db.exec("PRAGMA foreign_keys=ON");
+    const source = readFileSync(
+      new URL("../server/db.js", import.meta.url),
+      "utf8",
+    );
+    for (const [, sql] of source.matchAll(/db\.exec\(`([\s\S]*?)`\)/g)) {
+      db.exec(sql);
+      if (sql.includes("INSERT INTO migrations(version) VALUES (7)")) break;
+    }
+    seed(db, "Synthetic-rollback-fixture-123!");
     const users = db.prepare("SELECT * FROM users ORDER BY id").all(),
       transactions = db.prepare("SELECT * FROM transactions ORDER BY id").all(),
       events = db.prepare("SELECT * FROM audit_events ORDER BY id").all();

@@ -1,3 +1,5 @@
+import { staffImageSql } from "./profile-images.js";
+import { assertApprovalLimit } from "./permissions.js";
 import { businessDate, approvalHistory } from "./role-data.js";
 import { registerPartialMatches } from "./partial-matching.js";
 import { backup } from "node:sqlite";
@@ -855,7 +857,7 @@ export function registerEnhancements(
     res.json(
       db
         .prepare(
-          "SELECT c.*,u.name AS requester FROM control_requests c JOIN users u ON u.id=c.user_id ORDER BY c.created_at DESC",
+          `SELECT c.*,u.name AS requester,${staffImageSql("u.id")} AS requester_image_url FROM control_requests c JOIN users u ON u.id=c.user_id ORDER BY c.created_at DESC`,
         )
         .all()
         .map((r) => ({ ...r, payload: JSON.parse(r.payload) })),
@@ -951,6 +953,16 @@ export function registerEnhancements(
       const p = JSON.parse(r.payload);
       let result = null;
       if (decision === "approved") {
+        const amount =
+          r.kind === "reversal"
+            ? db
+                .prepare("SELECT amount FROM transactions WHERE id=?")
+                .get(p.transaction_id)?.amount
+            : ["adjustment", "writeoff"].includes(r.kind)
+              ? money(p.amount)
+              : null;
+        if (amount !== null && amount !== undefined)
+          assertApprovalLimit(db, req.user, amount);
         if (r.kind === "period_close")
           setPeriod(db, req.user.id, p.month, 1, reason);
         if (r.kind === "reversal")
@@ -1073,6 +1085,17 @@ export function registerEnhancements(
   );
   app.get("/api/approval-policy", allow(readers), (req, res) =>
     res.json({
+      limits: db
+        .prepare(
+          "SELECT l.user_id,l.max_amount,l.reason,l.changed_at,u.name,u.role FROM approval_limits l JOIN users u ON u.id=l.user_id",
+        )
+        .all()
+        .map((l) => ({ ...l, max_amount: String(l.max_amount) })),
+      approvers: db
+        .prepare(
+          "SELECT id,name,role FROM users WHERE active=1 AND role IN ('manager','finance','admin') ORDER BY name",
+        )
+        .all(),
       delegates: db
         .prepare(
           "SELECT d.*,u.name,u.role FROM approval_delegates d JOIN users u ON u.id=d.user_id",
@@ -1313,7 +1336,7 @@ export function registerEnhancements(
     res.json(
       db
         .prepare(
-          "SELECT p.*,u.name AS requester FROM reconciliation_proposals p JOIN users u ON u.id=p.user_id ORDER BY p.created_at DESC",
+          `SELECT p.*,u.name AS requester,${staffImageSql("u.id")} AS requester_image_url FROM reconciliation_proposals p JOIN users u ON u.id=p.user_id ORDER BY p.created_at DESC`,
         )
         .all()
         .map((p) => ({
@@ -1602,7 +1625,13 @@ export function registerEnhancements(
       mobile: sum(incoming.filter((t) => t.channel === "mobile")),
       bank: sum(incoming.filter((t) => t.channel === "bank")),
     };
-    if (req.user.role === "cashier") return res.json({ daily });
+    const monthlyRows = rows.filter(t => t.date.startsWith(date.slice(0, 7)) && ["approved", "not_required"].includes(t.approval));
+    const monthly = { month: date.slice(0, 7), incoming: sum(monthlyRows.filter(t => t.direction === "in")), outgoing: sum(monthlyRows.filter(t => t.direction === "out")) };
+    if (req.user.role === "cashier") {
+      const assigned = new Set(db.prepare("SELECT invoice_id FROM invoice_assignments WHERE user_id=?").all(req.user.id).map(i => i.invoice_id));
+      const pending = documentRows(db).filter(i => (assigned.has(i.id) || i.user_id === req.user.id) && i.lifecycle === "issued" && BigInt(i.outstanding) > 0n);
+      return res.json({ daily, monthly, total_sales: sum(rows.filter(t => t.entry_kind === "sale" && t.direction === "in" && !t.reversal_of && !reversed.has(t.id) && ["approved", "not_required"].includes(t.approval))), pending_customer_payments: pending.length });
+    }
     const items = exceptions(req.query),
       imports = db
         .prepare(
@@ -1622,13 +1651,16 @@ export function registerEnhancements(
       );
     res.json({
       daily,
+      monthly,
+      duplicate_indicators: items.filter(i => i.type === "duplicate" && i.status !== "dismissed").length,
+      forecast: req.user.role === "manager" ? analytics(rows, req.query).forecast : undefined,
       pending_exceptions: items.filter((i) => i.status !== "dismissed").length,
       recent_imports: imports,
       approval_history: history.slice(0, 6),
       recent_adjustments: adjustments.slice(0, 6),
       recent_audit: db
         .prepare(
-          "SELECT e.id,e.action,e.created_at,u.name AS user_name FROM audit_events e LEFT JOIN users u ON u.id=e.user_id ORDER BY e.created_at DESC,e.rowid DESC",
+          `SELECT e.id,e.action,e.created_at,u.name AS user_name,${staffImageSql("u.id")} AS user_image_url FROM audit_events e LEFT JOIN users u ON u.id=e.user_id ORDER BY e.created_at DESC,e.rowid DESC`,
         )
         .all()
         .filter(
@@ -1973,6 +2005,9 @@ export function registerEnhancements(
       const filename = join(directory, "snapshot.db");
       audit(db, req.user.id, "backup.export", "database");
       await backup(db, filename);
+      audit(db, req.user.id, "backup.created", "database", {
+        integrity: "consistent_snapshot",
+      });
       res.attachment(
         `finbiz-backup-${new Date().toISOString().slice(0, 10)}.db`,
       );

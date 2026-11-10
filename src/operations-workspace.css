@@ -1,0 +1,138 @@
+.operations-stack {
+  display: grid;
+  gap: var(--space-5);
+}
+.operations-panel {
+  min-width: 0;
+  padding: 0;
+}
+.operations-stack > .operations-panel {
+  margin-bottom: 0;
+}
+/* Headers own their padding, just as they do on the original workspace pages. */
+.operations-panel > :not(.panel-header):not(.operations-table) {
+  margin-inline: var(--card-padding);
+}
+.operations-panel > :last-child:not(.panel-header) {
+  margin-bottom: var(--card-padding);
+}
+.operations-panel .panel-header {
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.operations-table {
+  overflow-x: auto;
+  margin: 0 var(--card-padding) var(--card-padding);
+  max-width: calc(100% - var(--card-padding) * 2);
+  border-radius: var(--radius-lg);
+}
+.operations-table table {
+  width: 100%;
+  min-width: 740px;
+}
+.operations-table td {
+  max-width: 280px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.operations-table td.money {
+  white-space: nowrap;
+}
+.operations-table small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  white-space: normal;
+}
+.operations-actions,
+.operations-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.operations-actions p {
+  width: 100%;
+}
+.operations-filters {
+  margin: 12px 0;
+}
+.operations-filters label {
+  display: grid;
+  gap: 6px;
+  min-width: 180px;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+.operations-panel .panel-header > label {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+.operations-panel .panel-header .button.small {
+  min-height: var(--button-height);
+  padding: 8px 16px;
+  font-size: var(--text-ui);
+}
+.operations-panel input,
+.operations-panel select {
+  max-width: 100%;
+}
+.operations-panel details {
+  margin-top: 10px;
+}
+.operations-panel summary {
+  cursor: pointer;
+}
+.operations-panel code {
+  overflow-wrap: anywhere;
+}
+.security-controls form {
+  max-width: 480px;
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+.security-controls label {
+  display: grid;
+  gap: 8px;
+}
+.security-secret {
+  display: block;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  letter-spacing: 2px;
+  user-select: all;
+}
+.security-recovery {
+  padding: 20px;
+  margin: 20px 0;
+  background: var(--surface-soft);
+  border-radius: var(--radius-lg);
+}
+.security-recovery ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+.security-recovery code {
+  user-select: all;
+}
+@media (max-width: 600px) {
+  .operations-filters label {
+    width: 100%;
+    min-width: 0;
+  }
+  .security-recovery ul {
+    grid-template-columns: 1fr;
+  }
+  .operations-panel .panel-header > .operations-actions {
+    width: 100%;
+  }
+}

@@ -1,0 +1,100 @@
+/* Transaction filter layout owns its sizing; other page filters stay independent. */
+.reference-workspace .transaction-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.transaction-filter-primary {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) minmax(145px, 1fr) repeat(
+      2,
+      minmax(145px, 1fr)
+    );
+  gap: 12px;
+}
+.transaction-filters label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+.transaction-filters .input-container {
+  min-width: 0;
+  width: 100%;
+}
+.reference-workspace .transaction-filters .input-container > .input {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 10px 12px;
+  min-height: 44px;
+}
+.transaction-search .input-container > svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.reference-workspace
+  .transaction-filters
+  .transaction-search
+  .input-container
+  > .input {
+  padding-left: 36px;
+}
+.transaction-filter-advanced {
+  min-width: 0;
+  max-width: none;
+}
+.transaction-filter-advanced > summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 8px 4px;
+  color: var(--primary);
+  font-size: var(--text-ui);
+  font-weight: 650;
+}
+.transaction-filter-advanced .count-label {
+  margin-left: 8px;
+}
+.transaction-filter-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 12px;
+  padding: 10px 0 4px;
+}
+.transaction-filter-scope {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.transaction-filter-scope p {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .transaction-filter-primary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .transaction-filter-primary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (pointer: coarse) {
+  .transaction-filter-advanced > summary {
+    min-height: 44px;
+  }
+}

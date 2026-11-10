@@ -101,7 +101,7 @@ npm run benchmark
 npm run restore -- --source backups/selected-snapshot.db --destination data/restored-new.db
 ```
 
-Restoration refuses an existing destination and invalidates restored sessions. Set `DB_PATH` to the verified new file only after operator review. Admin Settings also provides a consistent backup download. Encryption, production HTTPS, scheduled backups and company UAT are outstanding external controls; see OPERATIONS.md. A local Git repository was initialised; changes were not committed or published.
+Restoration refuses an existing destination and invalidates restored sessions. Set `DB_PATH` to the verified new file only after operator review. Admin Settings also provides a consistent backup download. Encrypted scheduled snapshots are available in System maintenance once the server encryption key is configured. Production HTTPS, off-site storage/key custody and company UAT remain operator requirements; see docs/OPERATIONS.md. A local Git repository was initialised; changes were not committed or published.
 
 ## UI/UX enhancement
 
@@ -110,3 +110,7 @@ The 2 November 2026 UI pass consolidates shared tokens and actions, rebalances l
 ## Role responsibilities and access policies
 
 All five roles now have dedicated dashboard content and server-enforced workspaces. Users provides searchable staff management and reauthenticated password reset; Settings provides explicit auditor export and cashier customer/allocation policies. Migration 7 adds only those default-off policies and audit indexes. The Approval Centre includes completed decision history; cashier daily figures distinguish receipted sales without recording cash twice. See [the complete role matrix, implementation report and limitations](docs/ROLE_WORKSPACE_AUDIT.md). Restart the backend to install the updated routes and safe startup migration. Browser UAT remains pending because the browser host is unavailable.
+
+Profile supports adding, previewing, replacing and removing a personal photo for every role. Choose **Profile → Add photo → Save photo**. JPG, PNG and WebP images up to 10 MB are resized locally before saving; the saved image appears in the sidebar as well. Startup migration 8 stores photos separately from user credentials in the database, and photos are included in database backups. Restart the backend after updating to install the migration and upload routes.
+
+Profile photos also appear in the desktop/mobile header, staff directory, approval identities, transaction recorder details and audit/activity entries. Authenticated staff can see workspace profile photos; each user can edit only their own. Missing or unavailable images fall back to initials alongside the existing user names.

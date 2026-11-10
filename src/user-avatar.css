@@ -1,0 +1,63 @@
+.staff-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--avatar-size, 32px);
+  height: var(--avatar-size, 32px);
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1;
+  vertical-align: middle;
+}
+.staff-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.staff-identity {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  vertical-align: middle;
+}
+.staff-identity-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.staff-identity-copy > span {
+  font: inherit;
+}
+.staff-identity-copy small {
+  display: block;
+}
+.staff-avatar.profile-avatar {
+  --avatar-size: 76px;
+  display: grid;
+  font-size: 1.5rem;
+}
+.reference-workspace .workspace-profile {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  flex: 0 0 auto;
+}
+.workspace-profile > .staff-avatar {
+  --avatar-size: 100%;
+  border-radius: inherit;
+  font-size: inherit;
+}
+.staff-avatar.user-avatar {
+  --avatar-size: 38px;
+}
+@media (max-width: 760px) {
+  .reference-workspace .workspace-profile {
+    width: 38px;
+    height: 38px;
+  }
+}

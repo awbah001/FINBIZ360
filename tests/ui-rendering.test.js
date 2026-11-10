@@ -23,7 +23,7 @@ test("rendered dashboards and invoice controls respect read-only roles and non-c
       format: "esm",
       platform: "node",
       jsx: "automatic",
-      external: ["react", "react/*", "lucide-react"],
+      external: ["react", "react/*", "@phosphor-icons/react"],
       loader: { ".css": "empty" },
       logLevel: "silent",
     });

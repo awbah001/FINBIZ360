@@ -2,7 +2,7 @@ import { DatabaseSync, backup } from "node:sqlite";
 import { existsSync, openSync, closeSync, mkdirSync } from "node:fs";
 import { dirname, resolve, basename } from "node:path";
 import { pathToFileURL } from "node:url";
-import { audit, atomic } from "./db.js";
+import { audit, atomic, SCHEMA_VERSION } from "./db.js";
 
 export async function restoreToNewFile(source, destination) {
   const input = resolve(source),
@@ -23,7 +23,7 @@ export async function restoreToNewFile(source, destination) {
     const version = original
       .prepare("SELECT MAX(version) AS n FROM migrations")
       .get().n;
-    if (version > 7)
+    if (version > SCHEMA_VERSION)
       throw new Error("Backup schema is newer than this application.");
     const expected = original
       .prepare("SELECT COUNT(*) AS n FROM transactions")

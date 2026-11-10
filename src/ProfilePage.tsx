@@ -1,14 +1,15 @@
 import {
-  Building2,
+  BuildingOffice as Building2,
   FileText,
-  LockKeyhole,
-  Mail,
-  Pencil,
+  LockKey as LockKeyhole,
+  Envelope as Mail,
+  PencilSimple as Pencil,
   ShieldCheck,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import CardTitle from "./CardTitle";
 import "./profile.css";
+import ProfilePhoto, { type ProfileUser } from "./ProfilePhoto";
 
 export default function ProfilePage({
   user,
@@ -18,14 +19,16 @@ export default function ProfilePage({
   canApprove,
   onEdit,
   onPassword,
+  onPhoto,
 }: {
-  user: { id: string; name: string; email: string; role: string };
+  user: ProfileUser;
   role: string;
   company: string;
   demo: boolean;
   canApprove: boolean;
   onEdit: () => void;
   onPassword: () => void;
+  onPhoto: (image: Blob | null) => Promise<void>;
 }) {
   const financial = ["manager", "finance"].includes(user.role);
   const access = [
@@ -65,27 +68,19 @@ export default function ProfilePage({
       <aside className="panel profile-identity" aria-label="Your account">
         <div className="profile-cover" aria-hidden="true" />
         <div className="profile-identity-body">
-          <div className="profile-avatar" aria-hidden="true">
-            {user.name
-              .trim()
-              .split(/\s+/)
-              .map((word) => word[0])
-              .slice(0, 2)
-              .join("")
-              .toUpperCase()}
-          </div>
+          <ProfilePhoto user={user} onSave={onPhoto} />
           <h2>{user.name}</h2>
           <span className="profile-role">
-            <ShieldCheck size={14} aria-hidden="true" />
+            <ShieldCheck size={14} aria-hidden="true" focusable="false" />
             {role}
           </span>
           <p className="profile-email">{user.email}</p>
           <div className="profile-company">
-            <Building2 size={17} aria-hidden="true" />
+            <Building2 size={17} aria-hidden="true" focusable="false" />
             <span>{company}</span>
           </div>
           <button className="button secondary small" onClick={onEdit}>
-            <Pencil size={15} />
+            <Pencil size={15} aria-hidden="true" focusable="false" />
             Edit profile
           </button>
         </div>
@@ -101,7 +96,7 @@ export default function ProfilePage({
               <p>Your account information in this workspace.</p>
             </CardTitle>
             <button className="button secondary small" onClick={onEdit}>
-              <Pencil size={14} />
+              <Pencil size={14} aria-hidden="true" focusable="false" />
               Edit
             </button>
           </header>
@@ -112,7 +107,7 @@ export default function ProfilePage({
             </div>
             <div>
               <dt>
-                <Mail size={14} aria-hidden="true" />
+                <Mail size={14} aria-hidden="true" focusable="false" />
                 Sign-in email
               </dt>
               <dd>{user.email}</dd>
@@ -147,7 +142,7 @@ export default function ProfilePage({
               </p>
             </div>
             <button className="button secondary small" onClick={onPassword}>
-              <LockKeyhole size={15} />
+              <LockKeyhole size={15} aria-hidden="true" focusable="false" />
               Change password
             </button>
           </div>

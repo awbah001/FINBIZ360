@@ -4,6 +4,22 @@ Use the implementation prompt below to improve the existing application. This is
 
 ## Current card design scope
 
+### Shared form pattern (latest form direction)
+
+Adapt the supplied Uiverse.io pattern by mahbowal throughout business forms using `form-pattern.css` and the shared `finbiz-form` class. Use white-to-light-grey gradient surfaces, thick white edges, rounded corners, raised white inputs, teal focus edges, gradient submit buttons and gentle button feedback. Retain the existing teal brand, labels, validation, password visibility controls, checkbox/radio semantics and business layouts. Authentication and modal wrappers provide their form surface without nesting duplicate borders or shadows. Complex business forms keep their responsive widths rather than the sample's fixed 350px width. Honour reduced motion and retain visible keyboard focus.
+
+### Full-system smooth white presentation (latest direction)
+
+The supplied image is a reference for the complete visual language, not only KPI cards. Keep the existing page arrangement, sections, role workflows and teal brand while carrying an airy white canvas, softly coloured icon wells, restrained violet/coral/amber/blue accents, rounded record rows and gentle transitions across navigation, header tools, filters, forms, dialogs, activity, public features and all role dashboards. The sidebar remains teal; financial data stays readable. Replace the old wave-dominant workspace background with the requested quiet white surfaces.
+
+`SystemIcon.tsx` owns the shared layered duotone icon treatment and semantic icon-to-colour mapping. Use it for sidebar destinations, module heroes, section headings, summaries, shortcuts and public feature icons. Icon plates and decorative underlays are hidden from assistive technology; visible labels retain their meaning. `reference-polish.css` owns the complete finishing layer and removes abrupt offset-button jumps in favour of softer feedback. Preserve keyboard focus, coarse-pointer targets and reduced-motion preferences. Keep the working calendar and existing range inputs.
+
+### Card and calendar reference (3 November 2026)
+
+Use the supplied file-dashboard image for card shape, softly raised depth, compact icon wells, coral/violet/gold accents and restrained animation. Preserve FinBiz 360's teal branding, sidebar, page arrangement, dashboard sections, business controls and role boundaries. Give existing KPI cards solid semantic-colour surfaces with readable values, while keeping operational forms, tables and charts on quiet white panels. Carry the rounded-card/icon treatment into the public site, authentication shell and all role workspaces.
+
+`reference-polish.css` owns this additional presentation layer and is imported after the existing design styles. Preserve the stylesheet edits already present in the workspace. `WorkspaceCalendar.tsx` extends the current topbar date popover with Month/Week views, previous/next navigation and Today. Selecting a day applies the existing date filters only where authorised; administrators get a reference-only calendar. Keep manual range fields and All recorded dates. Honour reduced motion and visible keyboard focus. Do not introduce unrelated storage charts, fake tasks, avatars or financial data from the reference image.
+
 ### Workspace reference (latest visual direction)
 
 Use the supplied Transactions reference to guide the actual application pages: a soft wave background, breadcrumb navigation, prominent module icon and title, grouped pill-shaped filters, rounded white register panels, quiet table headers and illustrated empty states. Apply the shared presentation to operational pages without replacing their controls or data. Retain existing module and semantic colours, the reference deep-teal sidebar with white labels and turquoise active navigation, filters, transaction operations, role permissions, export scope and backend integrations. Keep login styling separate. System workflow testing is paused at the user's request; a successful build does not imply browser or workflow verification.

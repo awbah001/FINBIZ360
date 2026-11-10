@@ -1,4 +1,11 @@
-const common = ["Overview", "Profile"];
+const common = [
+  "Overview",
+  "Profile",
+  "Notifications",
+  "Workspace guide",
+  "Security",
+  "Reminders",
+];
 const financialPages = [
   "Transactions",
   "Invoices",
@@ -13,6 +20,11 @@ const financialPages = [
   "Reports",
   "Analytics",
   "Audit trail",
+  "Cash shifts",
+  "Budgets",
+  "Collections & payables",
+  "Recurring drafts",
+  "Purchases",
 ];
 export const roleWorkspaces: Record<
   string,
@@ -27,7 +39,15 @@ export const roleWorkspaces: Record<
     title: "System administration",
     description:
       "Manage staff access, organisation settings and database backups.",
-    pages: [...common, "Users", "Audit trail", "Settings"],
+    pages: [
+      ...common,
+      "Users",
+      "Roles & permissions",
+      "Active sessions",
+      "System maintenance",
+      "Audit trail",
+      "Settings",
+    ],
     tasks: [
       {
         page: "Users",
@@ -52,7 +72,7 @@ export const roleWorkspaces: Record<
     title: "Manager dashboard",
     description:
       "Oversee business performance, review payments and manage financial controls.",
-    pages: [...common, ...financialPages, "Settings"],
+    pages: [...common, ...financialPages, "Settings", "Staff overview"],
     tasks: [],
   },
   finance: {
@@ -87,7 +107,14 @@ export const roleWorkspaces: Record<
     title: "Cashier workspace",
     description:
       "Record incoming receipts and review your own transaction history.",
-    pages: [...common, "Transactions", "Customers"],
+    pages: [
+      ...common,
+      "Transactions",
+      "Customers",
+      "Receipts",
+      "Assigned invoices",
+      "Cash shifts",
+    ],
     tasks: [
       {
         page: "Transactions",
@@ -136,9 +163,11 @@ export const canOpenPage = (
   role: string,
   page: string,
   delegatedApproval = false,
+  permittedPages?: string[],
 ) =>
-  (role === "admin" && page === "Approvals" && delegatedApproval) ||
-  (roleWorkspaces[role]?.pages.includes(page) ?? false);
+  (permittedPages === undefined || permittedPages.includes(page)) &&
+  ((role === "admin" && page === "Approvals" && delegatedApproval) ||
+    (roleWorkspaces[role]?.pages.includes(page) ?? false));
 
 // Direct links use the same page names and authorization as sidebar navigation.
 export const workspacePageFromSearch = (search: string) =>

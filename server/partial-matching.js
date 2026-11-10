@@ -1,3 +1,4 @@
+import { staffImageSql } from "./profile-images.js";
 import { id, money, atomic, audit } from "./db.js";
 
 // Partial amounts are evidence allocations, never mutations of posted cash amounts.
@@ -55,7 +56,7 @@ export function registerPartialMatches(
     res.json(
       db
         .prepare(
-          "SELECT p.*,u.name AS requester FROM partial_matches p JOIN users u ON u.id=p.user_id ORDER BY p.created_at DESC",
+          `SELECT p.*,u.name AS requester,${staffImageSql("u.id")} AS requester_image_url FROM partial_matches p JOIN users u ON u.id=p.user_id ORDER BY p.created_at DESC`,
         )
         .all()
         .map((p) => ({

@@ -1,13 +1,15 @@
 ﻿import { useEffect, useState } from "react";
 import {
   ShieldCheck,
-  Settings,
-  History,
-  Landmark,
-  KeyRound,
-} from "lucide-react";
+  Gear as Settings,
+  ClipboardText as History,
+  Bank as Landmark,
+  Key as KeyRound,
+} from "@phosphor-icons/react";
 import CardTitle from "./CardTitle";
 import InputSurface from "./InputSurface";
+import { UserIdentity } from "./UserAvatar";
+import PasswordInput from "./PasswordInput";
 import { ReferenceCategories } from "./Enhancements";
 type Row = Record<string, any>;
 type Props = {
@@ -54,7 +56,7 @@ export function AdminConfiguration(props: Props) {
               </p>
             </CardTitle>
             <form
-              className="policy-form"
+              className="policy-form finbiz-form"
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (busy) return;
@@ -331,7 +333,9 @@ export function ApprovalHistory({
                 <td>
                   <span className={`badge ${r.status}`}>{r.status}</span>
                 </td>
-                <td>{r.reviewer}</td>
+                <td>
+                  <UserIdentity name={r.reviewer} src={r.reviewer_image_url} />
+                </td>
                 <td>{r.decided_at}</td>
                 <td>{r.reason}</td>
               </tr>
@@ -389,7 +393,7 @@ export function ReceiptAllocation({
           </p>
           {data.invoices.length && BigInt(data.available) > 0n ? (
             <form
-              className="policy-form"
+              className="policy-form finbiz-form"
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (busy) return;
@@ -494,7 +498,7 @@ export function PasswordReset({
         </p>
       ) : (
         <form
-          className="policy-form"
+          className="policy-form finbiz-form"
           onSubmit={async (e) => {
             e.preventDefault();
             if (busy) return;
@@ -517,9 +521,9 @@ export function PasswordReset({
           <label>
             Your administrator password
             <InputSurface>
-              <input
+              <PasswordInput
                 className="input"
-                type="password"
+                visibilityLabel="administrator password"
                 autoComplete="current-password"
                 required
                 value={current}

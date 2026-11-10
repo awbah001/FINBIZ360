@@ -1,40 +1,56 @@
+import BrandLogo from "./BrandLogo";
+import {
+  CashShifts,
+  Budgets,
+  Followups,
+  RecurringDrafts,
+  Purchases,
+  Reminders,
+  Security,
+  SecureBackups,
+} from "./OperationsWorkspace";
 import React, { useEffect, useId, useRef, useState } from "react";
+import UserAvatar, { UserIdentity } from "./UserAvatar";
+import { FormInput } from "./PasswordInput";
 import { createRoot } from "react-dom/client";
 import {
+  IconContext,
+  Bell,
+  Truck,
+  Receipt,
+  ChartBar,
+  UserGear,
+  UserCircle,
+  Question,
   ArrowDownLeft,
   ArrowUpRight,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  ArrowLeftRight,
+  CaretLeft as ChevronLeft,
+  CaretRight as ChevronRight,
+  House as LayoutDashboard,
+  ArrowsLeftRight as ArrowLeftRight,
   FileText,
   Users,
-  User,
-  Building2,
-  Landmark,
-  Upload,
-  GitCompareArrows,
+  BuildingOffice as Building2,
+  Bank as Landmark,
+  UploadSimple as Upload,
+  ArrowsCounterClockwise as GitCompareArrows,
   ShieldCheck,
-  ChartNoAxesCombined,
-  History,
-  Settings,
-  LogOut,
+  ChartLineUp as ChartNoAxesCombined,
+  ClipboardText as History,
+  Gear as Settings,
+  SignOut as LogOut,
   Plus,
-  Search,
-  Download,
+  MagnifyingGlass as Search,
+  DownloadSimple as Download,
   X,
   Check,
-  CircleAlert,
-  Wallet,
-  Menu,
-  LockKeyhole,
-  RefreshCw,
-  CheckCheck,
-  Banknote,
-  Smartphone,
+  WarningCircle as CircleAlert,
+  LockKey as LockKeyhole,
+  Money as Banknote,
+  DeviceMobile as Smartphone,
   Eye,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./ui-tokens.css";
 import "./styles.css";
@@ -44,8 +60,11 @@ import Home from "./Home";
 import AuthFrame from "./AuthFrame";
 import { navigate, usePath } from "./navigation";
 import CardTitle from "./CardTitle";
+import SystemIcon from "./SystemIcon";
 import ProfilePage from "./ProfilePage";
 import InputSurface from "./InputSurface";
+import TransactionFilters from "./TransactionFilters";
+import { financialScopeLabel } from "./workspacePresentation";
 import "./design.css";
 import "./dashboard.css";
 import "./cards.css";
@@ -83,9 +102,34 @@ import "./ui.css";
 import PageHero from "./PageHero";
 import useNavigationDrawer from "./useNavigationDrawer";
 import { allowWorkspaceNavigation } from "./useUnsavedChanges";
+import "./reference-polish.css";
+import "./form-pattern.css";
+import "./responsive.css";
+import "./transaction-filters.css";
+import "./invoice-register.css";
+import "./workspace-usability.css";
+import {
+  AccessManagement,
+  ActiveSessions,
+  SystemMaintenance,
+  NotificationCentre,
+  StaffOverview,
+  ReceiptWorkspace,
+  AssignedInvoices,
+  InvoiceAssigner,
+  ApprovalLimits,
+} from "./WorkspacePages";
+
+const WorkspaceGuide = React.lazy(() => import("./WorkspaceGuide"));
 
 type Row = Record<string, any>;
-type User = { id: string; name: string; email: string; role: string };
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  image_url?: string | null;
+};
 type Field = {
   name: string;
   label: string;
@@ -149,18 +193,41 @@ function Badge({ value }: { value: string }) {
 function Empty({
   title = "Nothing here yet",
   description = "New records will appear here as you work.",
+  actionLabel,
+  onAction,
 }: {
   title?: string;
   description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
 }) {
   return (
     <div className="empty">
       <span className="empty-illustration" aria-hidden="true">
-        <FileText size={42} />
-        <Search className="empty-search" size={27} />
+        <FileText
+          size={42}
+          aria-hidden="true"
+          focusable="false"
+          className="icon-file-text"
+        />
+        <Search
+          className="empty-search"
+          size={27}
+          aria-hidden="true"
+          focusable="false"
+        />
       </span>
       <h3>{title}</h3>
       <p>{description}</p>
+      {actionLabel && onAction && (
+        <button
+          type="button"
+          className="button secondary small"
+          onClick={onAction}
+        >
+          {actionLabel}
+        </button>
+      )}
     </div>
   );
 }
@@ -286,11 +353,12 @@ function FormModal({
             disabled={busy}
             onClick={close}
           >
-            <X />
+            <X aria-hidden="true" focusable="false" />
           </button>
         </div>
         {description && <p className="muted">{description}</p>}
         <form
+          className="finbiz-form finbiz-form-modal"
           noValidate
           aria-busy={busy}
           onChange={() => setDirty(true)}
@@ -387,8 +455,9 @@ function FormModal({
                   </InputSurface>
                 ) : (
                   <InputSurface>
-                    <input
+                    <FormInput
                       id={`${formId}-${f.name}`}
+                      visibilityLabel={f.label.toLowerCase()}
                       aria-invalid={!!invalid[f.name]}
                       aria-describedby={`${formId}-${f.name}-help`}
                       className="input"
@@ -438,7 +507,7 @@ function FormModal({
             </button>
             <button className="button" disabled={busy}>
               {busy ? "Saving…" : submit}
-              <ArrowRight size={16} />
+              <ArrowRight size={16} aria-hidden="true" focusable="false" />
             </button>
           </div>
         </form>
@@ -452,11 +521,17 @@ const nav = [
     items: [
       ["Overview", LayoutDashboard],
       ["Transactions", ArrowLeftRight],
+      ["Receipts", Receipt],
+      ["Assigned invoices", FileText],
       ["Invoices", FileText],
-      ["Customers", Users],
-      ["Suppliers", Building2],
+      ["Customers", UserCircle],
+      ["Suppliers", Truck],
       ["Supplier bills", FileText],
       ["Accounts", Landmark],
+      ["Cash shifts", Banknote],
+      ["Collections & payables", Bell],
+      ["Recurring drafts", FileText],
+      ["Purchases", Truck],
     ],
   },
   {
@@ -466,21 +541,42 @@ const nav = [
       ["Reconciliation", GitCompareArrows],
       ["Exceptions", CircleAlert],
       ["Approvals", ShieldCheck],
-      ["Reports", ChartNoAxesCombined],
+      ["Reports", ChartBar],
       ["Analytics", ChartNoAxesCombined],
+      ["Budgets", ChartBar],
       ["Audit trail", History],
+    ],
+  },
+  {
+    group: "ACCESS & MAINTENANCE",
+    items: [
+      ["Roles & permissions", ShieldCheck],
+      ["Active sessions", Users],
+      ["System maintenance", Settings],
+      ["Staff overview", UserGear],
     ],
   },
   {
     group: "PREFERENCES",
     items: [
       ["Users", Users],
-      ["Profile", User],
+      ["Profile", UserCircle],
+      ["Notifications", Bell],
+      ["Reminders", Bell],
+      ["Security", ShieldCheck],
+      ["Workspace guide", Question],
       ["Settings", Settings],
     ],
   },
 ] as const;
 const moduleTones: Record<string, string> = {
+  "Cash shifts": "green",
+  "Collections & payables": "amber",
+  "Recurring drafts": "purple",
+  Purchases: "orange",
+  Budgets: "blue",
+  Reminders: "rose",
+  Security: "slate",
   Users: "cyan",
   Overview: "teal",
   Transactions: "blue",
@@ -528,6 +624,14 @@ function App() {
     [modal, setModal] = useState<React.ReactNode>(null),
     [mobile, setMobile] = useState(false);
   const drawer = useNavigationDrawer(mobile, () => setMobile(false));
+  useEffect(() => {
+    if (route !== "/workspace") return;
+    window.scrollTo(0, 0);
+    document
+      .getElementById("workspace-content")
+      ?.focus({ preventScroll: true });
+  }, [page, route]);
+  const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
   const [query, setQuery] = useState(""),
     [accountFilter, setAccountFilter] = useState(""),
     [from, setFrom] = useState(""),
@@ -540,8 +644,44 @@ function App() {
     [importBusy, setImportBusy] = useState(false);
   const finance = !!user && ["finance", "manager"].includes(user.role),
     readAll = user?.role !== "cashier";
+  const can = (permission: string) =>
+    !!master.permissions?.grants?.some((g: Row) => g.id === permission);
   const canAccessPage = (role: string, name: string) =>
-    canOpenPage(role, name, !!master.permissions?.can_approve);
+    canOpenPage(
+      role,
+      name,
+      !!master.permissions?.can_approve,
+      master.permissions?.pages,
+    );
+  const filtersActive = !!(
+    query ||
+    accountFilter ||
+    from ||
+    to ||
+    Object.values(extraFilters).some(Boolean)
+  );
+  const clearFinancialFilters = () => {
+    setQuery("");
+    setAccountFilter("");
+    setFrom("");
+    setTo("");
+    setExtraFilters({});
+    setTxPage(1);
+  };
+  const scopeDescription = financialScopeLabel({
+    accounts: master.accounts,
+    account: accountFilter,
+    from,
+    to,
+    query,
+    extra: extraFilters,
+  });
+  const reviewTransactions = (filters: Record<string, string>) => {
+    if (!changePage("Transactions")) return;
+    setExtraFilters(filters);
+    setQuery("");
+    setTxPage(1);
+  };
   const params = new URLSearchParams({
     ...extraFilters,
     ...(query ? { q: query } : {}),
@@ -642,6 +782,7 @@ function App() {
             user.role,
             page,
             !!m.permissions?.can_approve,
+            m.permissions?.pages,
           );
           const d = permitted && routes[page] ? await api(routes[page]) : null;
           if (!cancelled) {
@@ -672,6 +813,7 @@ function App() {
                       user.role,
                       page,
                       !!fresh.permissions?.can_approve,
+                      fresh.permissions?.pages,
                     )
                   ) {
                     setOverview(null);
@@ -724,6 +866,14 @@ function App() {
     const target = name;
     if (target !== page && !allowWorkspaceNavigation()) return false;
     setPage(target);
+    setCollapsedGroups((current) =>
+      current.filter(
+        (group) =>
+          !nav
+            .find((g) => g.group === group)
+            ?.items.some(([name]) => name === target),
+      ),
+    );
     window.history.pushState({}, "", workspacePageUrl(target));
     if (!["Transactions", "Reports", "Analytics"].includes(target))
       setExtraFilters({});
@@ -751,6 +901,8 @@ function App() {
           const body = { ...values, ...extra };
           if (typeof body.active === "string")
             body.active = body.active === "true";
+          if (path === "/secure-backups/policy")
+            body.enabled = body.enabled === "true";
           if (path === "/control-requests") {
             const { kind, reason, _request_key, ...payload } = body;
             if (payload.document_key) {
@@ -793,6 +945,7 @@ function App() {
   const newTransaction = (
     entryKind: "sale" | "receipt" | "expense" = "receipt",
   ) =>
+    can("finance.transaction.create") &&
     form(
       entryKind === "sale"
         ? "Record sale"
@@ -820,7 +973,9 @@ function App() {
           value: entryKind === "expense" ? "out" : "in",
           options: [
             { value: "in", label: "Inflow / receipt" },
-            ...(finance ? [{ value: "out", label: "Outflow / expense" }] : []),
+            ...(can("finance.expense.create")
+              ? [{ value: "out", label: "Outflow / expense" }]
+              : []),
           ],
         },
         {
@@ -894,7 +1049,7 @@ function App() {
                               aria-label="Close details"
                               onClick={() => setModal(null)}
                             >
-                              <X />
+                              <X aria-hidden="true" focusable="false" />
                             </button>
                           </div>
                           <dl className="details">
@@ -919,7 +1074,16 @@ function App() {
                             ].map(([k, v]) => (
                               <div key={k}>
                                 <dt>{k}</dt>
-                                <dd>{v}</dd>
+                                <dd>
+                                  {k === "Recorded by" ? (
+                                    <UserIdentity
+                                      name={t.user_name}
+                                      src={t.user_image_url}
+                                    />
+                                  ) : (
+                                    v
+                                  )}
+                                </dd>
                               </div>
                             ))}
                           </dl>
@@ -934,6 +1098,7 @@ function App() {
                               (user?.role === "cashier" &&
                                 t.user_id === user.id)
                             }
+                            can={can}
                             role={user?.role || ""}
                             revision={revision}
                           />
@@ -947,6 +1112,7 @@ function App() {
                               />
                             )}
                           {user?.role === "manager" &&
+                            can("finance.transaction.reverse") &&
                             !t.reversal_of &&
                             ["approved", "not_required"].includes(
                               t.approval,
@@ -986,9 +1152,17 @@ function App() {
                 >
                   <span className={`transaction-symbol ${t.direction}`}>
                     {t.direction === "in" ? (
-                      <ArrowDownLeft size={16} />
+                      <ArrowDownLeft
+                        size={16}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     ) : (
-                      <ArrowUpRight size={16} />
+                      <ArrowUpRight
+                        size={16}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     )}
                   </span>
                   <span>
@@ -1025,14 +1199,39 @@ function App() {
           ))}
         </tbody>
       </table>
-      {!rows.length && <Empty />}
+      {!rows.length && (
+        <Empty
+          title={
+            filtersActive
+              ? "No transactions match this scope"
+              : user?.role === "cashier"
+                ? "No receipts recorded yet"
+                : "No transactions recorded yet"
+          }
+          description={
+            filtersActive
+              ? "Try a different search, account or date range, or clear the filters."
+              : user?.role === "auditor"
+                ? "Transactions recorded by authorised staff will appear here for review."
+                : user?.role === "cashier"
+                  ? "Receipts created by your account will appear here."
+                  : "Recorded receipts and payments will appear in this register."
+          }
+          actionLabel={
+            page === "Transactions" && filtersActive
+              ? "Clear all filters"
+              : undefined
+          }
+          onAction={clearFinancialFilters}
+        />
+      )}
     </div>
   );
   if (route === "/") return <Home />;
   if (!["/login", "/register", "/workspace"].includes(route))
     return (
       <div className="boot">
-        <CircleAlert />
+        <CircleAlert aria-hidden="true" focusable="false" />
         <h1>Page not found</h1>
         <a className="button" href="/">
           Back to home
@@ -1041,17 +1240,17 @@ function App() {
     );
   if (initial)
     return (
-      <div className="boot">
+      <div className="boot" role="status" aria-live="polite" aria-busy="true">
         <span className="brand-icon">
-          <ChartNoAxesCombined />
+          <BrandLogo label="FinBiz 360" />
         </span>
         <p>Opening your workspace…</p>
       </div>
     );
   if (sessionError)
     return (
-      <div className="boot">
-        <CircleAlert />
+      <div className="boot" role="alert">
+        <CircleAlert aria-hidden="true" focusable="false" />
         <h2>Cannot connect to FinBiz</h2>
         <p>Start the app with npm run dev, then refresh this page.</p>
         <button className="button" onClick={() => location.reload()}>
@@ -1085,7 +1284,7 @@ function App() {
         </header>
         <a className="button auth-entry-link" href="/login">
           Sign in to workspace
-          <ArrowRight size={16} />
+          <ArrowRight size={16} aria-hidden="true" focusable="false" />
         </a>
       </AuthFrame>
     );
@@ -1124,11 +1323,30 @@ function App() {
     money: fmt,
     refresh,
     canEdit: finance,
+    can,
     canExport: !!master.permissions?.can_export,
     role: user.role,
     revision,
     userId: user.id,
   };
+  const workspaceProps = {
+    ...shared,
+    navigate: changePage,
+    grants: master.permissions?.grants || [],
+    contacts: master.contacts,
+    accounts: master.accounts,
+    pages: master.permissions?.pages,
+    params,
+  };
+  const operationalPage = [
+    "Cash shifts",
+    "Budgets",
+    "Collections & payables",
+    "Recurring drafts",
+    "Purchases",
+    "Reminders",
+    "Security",
+  ].includes(page);
   const exportUrl = (format: string) =>
     `/api/reports/export?${params}&format=${format}`;
   const PageIcon =
@@ -1173,11 +1391,12 @@ function App() {
       />,
     );
   const headerActions = () =>
-    page === "Transactions" && (finance || user.role === "cashier") ? (
+    page === "Transactions" && can("finance.transaction.create") ? (
       <button className="button" onClick={() => newTransaction()}>
-        <Plus size={17} /> Record transaction
+        <Plus size={17} aria-hidden="true" focusable="false" /> Record
+        transaction
       </button>
-    ) : page === "Invoices" && finance ? (
+    ) : page === "Invoices" && can("finance.invoice.create") ? (
       <button
         className="button"
         onClick={() =>
@@ -1219,11 +1438,10 @@ function App() {
           )
         }
       >
-        <Plus size={17} /> Create invoice
+        <Plus size={17} aria-hidden="true" focusable="false" /> Create invoice
       </button>
     ) : ["Customers", "Suppliers"].includes(page) &&
-      (finance ||
-        (page === "Customers" && master.permissions?.can_create_customers)) ? (
+      can("finance.contact.create") ? (
       <button
         className="button"
         onClick={() =>
@@ -1250,9 +1468,10 @@ function App() {
           )
         }
       >
-        <Plus size={17} /> Add {page === "Customers" ? "customer" : "supplier"}
+        <Plus size={17} aria-hidden="true" focusable="false" /> Add{" "}
+        {page === "Customers" ? "customer" : "supplier"}
       </button>
-    ) : page === "Accounts" && (finance || user.role === "admin") ? (
+    ) : page === "Accounts" && can("finance.account.create") ? (
       <button
         className="button"
         onClick={() =>
@@ -1296,11 +1515,12 @@ function App() {
           )
         }
       >
-        <Plus size={17} /> Add account
+        <Plus size={17} aria-hidden="true" focusable="false" /> Add account
       </button>
-    ) : page === "Overview" && (finance || user.role === "cashier") ? (
+    ) : page === "Overview" && can("finance.transaction.create") ? (
       <button className="button" onClick={() => newTransaction()}>
-        <Plus size={17} /> Record transaction
+        <Plus size={17} aria-hidden="true" focusable="false" /> Record
+        transaction
       </button>
     ) : null;
   return (
@@ -1324,7 +1544,7 @@ function App() {
             aria-label="Close navigation"
             onClick={() => setMobile(false)}
           >
-            <X size={20} />
+            <X size={20} aria-hidden="true" focusable="false" />
           </button>
           <a
             className="brand sidebar-brand"
@@ -1332,7 +1552,7 @@ function App() {
             aria-label="FinBiz 360 home"
           >
             <span className="brand-icon">
-              <ChartNoAxesCombined size={23} />
+              <BrandLogo />
             </span>
             <span className="sidebar-brand-copy">
               <strong>
@@ -1354,44 +1574,76 @@ function App() {
                 role="group"
                 aria-label={group.group}
               >
-                <span className="nav-label">{group.group}</span>
-                {group.items
-                  .filter(([name]) => canAccessPage(user.role, name))
-                  .map(([name, Icon]) => (
-                    <button
-                      key={name}
-                      className={`nav-item ${page === name ? "active" : ""}`}
-                      aria-current={page === name ? "page" : undefined}
-                      onClick={() => changePage(name)}
-                    >
-                      <span
-                        className={`nav-icon tone-${moduleTones[name] || "teal"}`}
-                        aria-hidden="true"
+                <button
+                  type="button"
+                  className="nav-label nav-group-toggle"
+                  aria-expanded={!collapsedGroups.includes(group.group)}
+                  aria-controls={`nav-${group.group.replaceAll(" ", "-")}`}
+                  onClick={() =>
+                    setCollapsedGroups((current) =>
+                      current.includes(group.group)
+                        ? current.filter((g) => g !== group.group)
+                        : [...current, group.group],
+                    )
+                  }
+                >
+                  <span>{group.group}</span>
+                  <ChevronRight
+                    size={14}
+                    style={{
+                      transform: collapsedGroups.includes(group.group)
+                        ? undefined
+                        : "rotate(90deg)",
+                    }}
+                    aria-hidden="true"
+                    focusable="false"
+                  />
+                </button>
+                <div
+                  id={`nav-${group.group.replaceAll(" ", "-")}`}
+                  hidden={collapsedGroups.includes(group.group)}
+                >
+                  {group.items
+                    .filter(([name]) => canAccessPage(user.role, name))
+                    .map(([name, Icon]) => (
+                      <button
+                        key={name}
+                        title={name === "Overview" ? "Dashboard" : name}
+                        className={`nav-item ${page === name ? "active" : ""}`}
+                        aria-current={page === name ? "page" : undefined}
+                        onClick={() => changePage(name)}
                       >
-                        <Icon size={18} />
-                      </span>
-                      <span className="nav-item-label">
-                        {name === "Overview" ? "Dashboard" : name}
-                      </span>
-                      {name === "Approvals" &&
-                        Number(overview?.pending) > 0 && (
-                          <span className="nav-count">{overview?.pending}</span>
-                        )}
-                    </button>
-                  ))}
+                        <SystemIcon
+                          icon={Icon}
+                          variant="navigation"
+                          active={page === name}
+                          className="nav-icon"
+                          tone={moduleTones[name] || "teal"}
+                          size={21}
+                        />
+                        <span className="nav-item-label">
+                          {name === "Overview" ? "Dashboard" : name}
+                        </span>
+                        {name === "Approvals" &&
+                          Number(overview?.pending) > 0 && (
+                            <span className="nav-count">
+                              {overview?.pending}
+                            </span>
+                          )}
+                      </button>
+                    ))}
+                </div>
               </div>
             ))}
         </nav>
         <footer className="sidebar-bottom">
           <div className="user-card">
             <div className="user-summary">
-              <span className="user-avatar" aria-hidden="true">
-                {user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .slice(0, 2)
-                  .join("")}
-              </span>
+              <UserAvatar
+                className="user-avatar"
+                name={user.name}
+                src={user.image_url}
+              />
               <div>
                 <strong>{user.name}</strong>
                 <small>{roleLabel[user.role]}</small>
@@ -1413,7 +1665,7 @@ function App() {
                 }
               }}
             >
-              <LogOut size={16} />
+              <LogOut size={16} aria-hidden="true" focusable="false" />
               Sign out
             </button>
           </div>
@@ -1436,7 +1688,7 @@ function App() {
           accounts={master.accounts}
           account={accountFilter}
           onAccount={
-            user.role === "admin"
+            user.role === "admin" || operationalPage
               ? undefined
               : (value) => {
                   setAccountFilter(value);
@@ -1445,8 +1697,10 @@ function App() {
           }
           from={from}
           to={to}
-          onFrom={user.role === "admin" ? undefined : setFrom}
-          onTo={user.role === "admin" ? undefined : setTo}
+          onFrom={
+            user.role === "admin" || operationalPage ? undefined : setFrom
+          }
+          onTo={user.role === "admin" || operationalPage ? undefined : setTo}
           pending={Number(overview?.pending || 0)}
           readAll={canAccessPage(user.role, "Approvals")}
           onMenu={() => setMobile(true)}
@@ -1473,15 +1727,19 @@ function App() {
               <button type="button" onClick={() => changePage("Overview")}>
                 Dashboard
               </button>
-              <ArrowRight size={15} aria-hidden="true" />
+              <ArrowRight size={15} aria-hidden="true" focusable="false" />
               <span aria-current="page">{page}</span>
             </nav>
           )}
           <PageHero page={page}>
             <div className="page-heading-identity">
-              <span className="page-heading-icon" aria-hidden="true">
-                <PageIcon size={34} strokeWidth={1.8} />
-              </span>
+              <SystemIcon
+                icon={PageIcon}
+                variant="hero"
+                className="page-heading-icon"
+                tone={moduleTones[page] || "teal"}
+                size={36}
+              />
               <div>
                 <div className="eyebrow">
                   {page === "Overview"
@@ -1496,6 +1754,20 @@ function App() {
                     (
                       {
                         Overview: roleWorkspaces[user.role].description,
+                        "Cash shifts":
+                          "Count cash, explain differences and obtain independent handover review.",
+                        Budgets:
+                          "Compare monthly spending with your approved category budgets.",
+                        "Collections & payables":
+                          "Track overdue balances, promised payments and the next follow-up.",
+                        "Recurring drafts":
+                          "Prepare repeat invoices and expenses for review before posting.",
+                        Purchases:
+                          "Request purchases, obtain approval and connect orders to supplier bills.",
+                        Reminders:
+                          "Prioritise due payments, unresolved work and operational alerts.",
+                        Security:
+                          "Protect your sign-in with an authenticator and recovery codes.",
                         Users:
                           "Create staff accounts and manage roles and access.",
                         Transactions:
@@ -1524,6 +1796,22 @@ function App() {
                         Suppliers: "The people and businesses you buy from.",
                         Profile:
                           "Manage your personal account details and access profile.",
+                        "Roles & permissions":
+                          "Define restricted staff roles and inspect module, action and scope grants.",
+                        "Active sessions":
+                          "Review signed-in staff and revoke sessions when required.",
+                        "System maintenance":
+                          "Review database health, backup history and the restore workflow.",
+                        "Staff overview":
+                          "Review staff responsibilities and account status.",
+                        Notifications:
+                          "Recent activity and pending work for your role.",
+                        Receipts:
+                          "Review, print and request corrections to your own receipts.",
+                        "Assigned invoices":
+                          "Review assigned customer invoices and submit invoice drafts.",
+                        "Workspace guide":
+                          "Find the correct page or controlled workflow for each of your responsibilities.",
                         Settings:
                           user.role === "admin"
                             ? "Manage organisation settings and database backups."
@@ -1537,7 +1825,7 @@ function App() {
             <div className="heading-actions">{headerActions()}</div>
           </PageHero>
           <div className="workspace-scope" role="note">
-            <ShieldCheck size={17} aria-hidden="true" />
+            <ShieldCheck size={17} aria-hidden="true" focusable="false" />
             <span>
               {user.role === "admin"
                 ? "System administration: Financial records are restricted. Backups contain the full database."
@@ -1552,231 +1840,254 @@ function App() {
           </div>
           {error && (
             <div className="error" role="alert">
-              <CircleAlert size={17} />
+              <CircleAlert size={17} aria-hidden="true" focusable="false" />
               {error}
               <button onClick={() => setRevision((v) => v + 1)}>Retry</button>
             </div>
           )}
           {["Transactions", "Reports", "Accounts", "Analytics"].includes(
             page,
-          ) && (
-            <div className="filter-bar">
-              {page === "Transactions" && (
-                <label className="search-box">
-                  <Search size={17} />
+          ) &&
+            (page === "Transactions" ? (
+              <TransactionFilters
+                accounts={master.accounts}
+                categories={master.categories || []}
+                query={query}
+                account={accountFilter}
+                from={from}
+                to={to}
+                extra={extraFilters}
+                onQuery={(value) => {
+                  setQuery(value);
+                  setTxPage(1);
+                }}
+                onAccount={(value) => {
+                  setAccountFilter(value);
+                  setTxPage(1);
+                }}
+                onFrom={(value) => {
+                  setFrom(value);
+                  setTxPage(1);
+                }}
+                onTo={(value) => {
+                  setTo(value);
+                  setTxPage(1);
+                }}
+                onExtra={(value) => {
+                  setExtraFilters(value);
+                  setTxPage(1);
+                }}
+                onReset={() => {
+                  setQuery("");
+                  setAccountFilter("");
+                  setFrom("");
+                  setTo("");
+                  setExtraFilters({});
+                  setTxPage(1);
+                }}
+              />
+            ) : (
+              <div className="filter-bar">
+                <div className="filter-controls">
                   <InputSurface>
-                    <input
+                    <select
                       className="input"
-                      aria-label="Search transactions"
-                      placeholder="Search description or reference…"
-                      value={query}
+                      aria-label="Filter by account"
+                      value={accountFilter}
                       onChange={(e) => {
-                        setQuery(e.target.value);
+                        setAccountFilter(e.target.value);
                         setTxPage(1);
                       }}
-                    />
-                  </InputSurface>
-                </label>
-              )}
-              <div className="filter-controls">
-                <InputSurface>
-                  <select
-                    className="input"
-                    aria-label="Filter by account"
-                    value={accountFilter}
-                    onChange={(e) => {
-                      setAccountFilter(e.target.value);
-                      setTxPage(1);
-                    }}
-                  >
-                    <option value="">All accounts</option>
-                    {master.accounts.map((a: Row) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
-                </InputSurface>
-                <label className="date-filter">
-                  From
-                  <InputSurface>
-                    <input
-                      className="input"
-                      aria-label="From date"
-                      type="date"
-                      value={from}
-                      onChange={(e) => {
-                        setFrom(e.target.value);
-                        setTxPage(1);
-                      }}
-                    />
-                  </InputSurface>
-                </label>
-                <label className="date-filter">
-                  To
-                  <InputSurface>
-                    <input
-                      className="input"
-                      aria-label="To date"
-                      type="date"
-                      value={to}
-                      onChange={(e) => {
-                        setTo(e.target.value);
-                        setTxPage(1);
-                      }}
-                    />
-                  </InputSurface>
-                </label>
-                {["Transactions", "Reports", "Analytics"].includes(page) && (
-                  <>
-                    {[
-                      {
-                        name: "channel",
-                        label: "Payment channel",
-                        options: [
-                          ["cash", "Cash"],
-                          ["mobile", "Mobile money"],
-                          ["bank", "Bank"],
-                        ],
-                      },
-                      {
-                        name: "category",
-                        label: "Category",
-                        options: (master.categories || []).map((c: Row) => [
-                          c.name,
-                          c.name,
-                        ]),
-                      },
-                      {
-                        name: "approval",
-                        label: "Approval status",
-                        options: [
-                          "not_required",
-                          "pending",
-                          "approved",
-                          "rejected",
-                        ].map((v) => [v, v.replaceAll("_", " ")]),
-                      },
-                      {
-                        name: "status",
-                        label: "Reconciliation status",
-                        options: [
-                          ["unmatched", "Unmatched"],
-                          ["partially_matched", "Partially matched"],
-                          ["reconciled", "Reconciled"],
-                        ],
-                      },
-                      {
-                        name: "sort",
-                        label: "Sort transactions",
-                        options: [
-                          ["date_desc", "Newest first"],
-                          ["date_asc", "Oldest first"],
-                          ["amount_desc", "Largest amount first"],
-                          ["amount_asc", "Smallest amount first"],
-                        ],
-                      },
-                    ]
-                      .filter(
-                        (f) => page === "Transactions" || f.name !== "sort",
-                      )
-                      .map((f) => (
-                        <InputSurface key={f.name}>
-                          <select
-                            className="input"
-                            aria-label={f.label}
-                            value={extraFilters[f.name] || ""}
-                            onChange={(e) => {
-                              setExtraFilters({
-                                ...extraFilters,
-                                [f.name]: e.target.value,
-                              });
-                              setTxPage(1);
-                            }}
-                          >
-                            <option value="">{f.label}</option>
-                            {f.options.map(([value, label]: string[]) => (
-                              <option key={value} value={value}>
-                                {label}
-                              </option>
-                            ))}
-                          </select>
-                        </InputSurface>
+                    >
+                      <option value="">All accounts</option>
+                      {master.accounts.map((a: Row) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name}
+                        </option>
                       ))}
-                  </>
-                )}
-                {(from ||
-                  to ||
-                  accountFilter ||
-                  query ||
-                  Object.values(extraFilters).some(Boolean)) && (
-                  <button
-                    className="button secondary small"
-                    onClick={() => {
-                      setFrom("");
-                      setTo("");
-                      setAccountFilter("");
-                      setExtraFilters({});
-                      setQuery("");
-                      setTxPage(1);
-                    }}
-                  >
-                    Reset
-                  </button>
+                    </select>
+                  </InputSurface>
+                  <label className="date-filter">
+                    From
+                    <InputSurface>
+                      <input
+                        className="input"
+                        aria-label="From date"
+                        type="date"
+                        value={from}
+                        onChange={(e) => {
+                          setFrom(e.target.value);
+                          setTxPage(1);
+                        }}
+                      />
+                    </InputSurface>
+                  </label>
+                  <label className="date-filter">
+                    To
+                    <InputSurface>
+                      <input
+                        className="input"
+                        aria-label="To date"
+                        type="date"
+                        value={to}
+                        onChange={(e) => {
+                          setTo(e.target.value);
+                          setTxPage(1);
+                        }}
+                      />
+                    </InputSurface>
+                  </label>
+                  {["Transactions", "Reports", "Analytics"].includes(page) && (
+                    <>
+                      {[
+                        {
+                          name: "channel",
+                          label: "Payment channel",
+                          options: [
+                            ["cash", "Cash"],
+                            ["mobile", "Mobile money"],
+                            ["bank", "Bank"],
+                          ],
+                        },
+                        {
+                          name: "category",
+                          label: "Category",
+                          options: (master.categories || []).map((c: Row) => [
+                            c.name,
+                            c.name,
+                          ]),
+                        },
+                        {
+                          name: "approval",
+                          label: "Approval status",
+                          options: [
+                            "not_required",
+                            "pending",
+                            "approved",
+                            "rejected",
+                          ].map((v) => [v, v.replaceAll("_", " ")]),
+                        },
+                        {
+                          name: "status",
+                          label: "Reconciliation status",
+                          options: [
+                            ["unmatched", "Unmatched"],
+                            ["partially_matched", "Partially matched"],
+                            ["reconciled", "Reconciled"],
+                          ],
+                        },
+                        {
+                          name: "sort",
+                          label: "Sort transactions",
+                          options: [
+                            ["date_desc", "Newest first"],
+                            ["date_asc", "Oldest first"],
+                            ["amount_desc", "Largest amount first"],
+                            ["amount_asc", "Smallest amount first"],
+                          ],
+                        },
+                      ]
+                        .filter(
+                          (f) => page === "Transactions" || f.name !== "sort",
+                        )
+                        .map((f) => (
+                          <InputSurface key={f.name}>
+                            <select
+                              className="input"
+                              aria-label={f.label}
+                              value={extraFilters[f.name] || ""}
+                              onChange={(e) => {
+                                setExtraFilters({
+                                  ...extraFilters,
+                                  [f.name]: e.target.value,
+                                });
+                                setTxPage(1);
+                              }}
+                            >
+                              <option value="">{f.label}</option>
+                              {f.options.map(([value, label]: string[]) => (
+                                <option key={value} value={value}>
+                                  {label}
+                                </option>
+                              ))}
+                            </select>
+                          </InputSurface>
+                        ))}
+                    </>
+                  )}
+                  {(from ||
+                    to ||
+                    accountFilter ||
+                    query ||
+                    Object.values(extraFilters).some(Boolean)) && (
+                    <button
+                      className="button secondary small"
+                      onClick={() => {
+                        setFrom("");
+                        setTo("");
+                        setAccountFilter("");
+                        setExtraFilters({});
+                        setQuery("");
+                        setTxPage(1);
+                      }}
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+                {page !== "Transactions" && (
+                  <span className="live-label">
+                    <span />
+                    {lastUpdated
+                      ? `Synced ${lastUpdated.toLocaleTimeString("en-GB", { timeZone: "Africa/Freetown" })} · 15s refresh`
+                      : "Syncing records…"}
+                  </span>
                 )}
               </div>
-              {page !== "Transactions" && (
-                <span className="live-label">
-                  <span />
-                  {lastUpdated
-                    ? `Synced ${lastUpdated.toLocaleTimeString("en-GB", { timeZone: "Africa/Freetown" })} · 15s refresh`
-                    : "Syncing records…"}
-                </span>
-              )}
-            </div>
-          )}
-          {(accountFilter ||
-            from ||
-            to ||
-            query ||
-            Object.values(extraFilters).some(Boolean)) && (
-            <div
-              className="active-scope"
-              aria-label="Applied financial filters"
-            >
-              <span className="field-help">Current scope</span>
-              {accountFilter && (
-                <span className="scope-chip">
-                  <strong>Account:</strong>{" "}
-                  {master.accounts.find((a: Row) => a.id === accountFilter)
-                    ?.name || "Selected account"}
-                </span>
-              )}
-              {from && (
-                <span className="scope-chip">
-                  <strong>From:</strong> {from}
-                </span>
-              )}
-              {to && (
-                <span className="scope-chip">
-                  <strong>To:</strong> {to}
-                </span>
-              )}
-              {query && (
-                <span className="scope-chip">
-                  <strong>Search:</strong> {query}
-                </span>
-              )}
-              {Object.entries(extraFilters)
-                .filter(([, value]) => value)
-                .map(([key, value]) => (
-                  <span className="scope-chip" key={key}>
-                    <strong>{key.replaceAll("_", " ")}:</strong>{" "}
-                    {String(value).replaceAll("_", " ")}
+            ))}
+          {!operationalPage &&
+            (accountFilter ||
+              from ||
+              to ||
+              query ||
+              Object.values(extraFilters).some(Boolean)) && (
+              <div
+                className="active-scope"
+                aria-label="Applied financial filters"
+              >
+                <span className="field-help">Current scope</span>
+                {accountFilter && (
+                  <span className="scope-chip">
+                    <strong>Account:</strong>{" "}
+                    {master.accounts.find((a: Row) => a.id === accountFilter)
+                      ?.name || "Selected account"}
                   </span>
-                ))}
-            </div>
-          )}
+                )}
+                {from && (
+                  <span className="scope-chip">
+                    <strong>From:</strong> {from}
+                  </span>
+                )}
+                {to && (
+                  <span className="scope-chip">
+                    <strong>To:</strong> {to}
+                  </span>
+                )}
+                {query && (
+                  <span className="scope-chip">
+                    <strong>Search:</strong> {query}
+                  </span>
+                )}
+                {Object.entries(extraFilters)
+                  .filter(([, value]) => value)
+                  .map(([key, value]) => (
+                    <span className="scope-chip" key={key}>
+                      <strong>{key.replaceAll("_", " ")}:</strong>{" "}
+                      {String(value).replaceAll("_", " ")}
+                    </span>
+                  ))}
+              </div>
+            )}
           {loading ? (
             <div
               className="loading-skeleton"
@@ -1789,7 +2100,7 @@ function App() {
             </div>
           ) : !canAccessPage(user.role, page) ? (
             <section className="panel" role="alert">
-              <ShieldCheck size={32} />
+              <ShieldCheck size={32} aria-hidden="true" focusable="false" />
               <h2>Access denied</h2>
               <p>
                 This page is outside your assigned workspace. Your role is{" "}
@@ -1810,12 +2121,67 @@ function App() {
                   onRecord={() => newTransaction()}
                   lastUpdated={lastUpdated}
                   onSale={() => newTransaction("sale")}
-                  onExpense={() => newTransaction("expense")}
+                  onExpense={
+                    can("finance.expense.create")
+                      ? () => newTransaction("expense")
+                      : undefined
+                  }
+                  canRecord={can("finance.transaction.create")}
                   demo={workspaceMode === "demo"}
+                  scopeDescription={scopeDescription}
+                  onReviewTransactions={
+                    canAccessPage(user.role, "Transactions")
+                      ? reviewTransactions
+                      : undefined
+                  }
                 />
               )}
               {page === "Users" && user.role === "admin" && (
                 <UserAdmin revision={revision} refresh={refresh} form={form} />
+              )}
+              {page === "Roles & permissions" && (
+                <AccessManagement {...workspaceProps} />
+              )}
+              {page === "Active sessions" && (
+                <ActiveSessions {...workspaceProps} />
+              )}
+              {page === "System maintenance" && (
+                <>
+                  <SystemMaintenance {...workspaceProps} />
+                  <SecureBackups {...workspaceProps} />
+                </>
+              )}
+              {page === "Cash shifts" && <CashShifts {...workspaceProps} />}
+              {page === "Budgets" && <Budgets {...workspaceProps} />}
+              {page === "Collections & payables" && (
+                <Followups {...workspaceProps} />
+              )}
+              {page === "Recurring drafts" && (
+                <RecurringDrafts {...workspaceProps} />
+              )}
+              {page === "Purchases" && <Purchases {...workspaceProps} />}
+              {page === "Reminders" && <Reminders {...workspaceProps} />}
+              {page === "Security" && <Security {...workspaceProps} />}
+              {page === "Notifications" && (
+                <NotificationCentre {...workspaceProps} />
+              )}
+              {page === "Staff overview" && (
+                <StaffOverview {...workspaceProps} />
+              )}
+              {page === "Receipts" && <ReceiptWorkspace {...workspaceProps} />}
+              {page === "Assigned invoices" && (
+                <AssignedInvoices {...workspaceProps} />
+              )}
+              {page === "Workspace guide" && (
+                <React.Suspense
+                  fallback={
+                    <p className="panel-note" role="status">
+                      Loading workspace guide?
+                    </p>
+                  }
+                >
+                  <WorkspaceGuide {...workspaceProps} />
+                </React.Suspense>
               )}
               {page === "Overview" && overview && user.role === "manager" && (
                 <Dashboard
@@ -1824,11 +2190,13 @@ function App() {
                   role={roleLabel[user.role]}
                   accounts={master.accounts}
                   readAll={readAll}
-                  canRecord={finance}
-                  canManageAccounts={finance}
+                  canRecord={can("finance.transaction.create")}
+                  canManageAccounts={can("finance.account.create")}
                   onRecord={() => newTransaction()}
                   onNavigate={changePage}
                   money={fmt}
+                  scopeDescription={scopeDescription}
+                  onReviewTransactions={reviewTransactions}
                   from={from}
                   to={to}
                   account={accountFilter}
@@ -1847,6 +2215,16 @@ function App() {
                   demo={workspaceMode === "demo"}
                   canApprove={!!master.permissions?.can_approve}
                   onPassword={changePassword}
+                  onPhoto={async (image) => {
+                    const body = image ? new FormData() : undefined;
+                    if (image) body!.append("image", image, "profile.png");
+                    const result = await api(
+                      "/profile/image",
+                      image ? "PUT" : "DELETE",
+                      body,
+                    );
+                    setUser(result.user);
+                  }}
                   onEdit={() =>
                     setModal(
                       <FormModal
@@ -1886,7 +2264,13 @@ function App() {
                         className="button secondary small"
                         href={exportUrl("csv")}
                       >
-                        <Download size={15} /> Export CSV
+                        <Download
+                          size={15}
+                          aria-hidden="true"
+                          focusable="false"
+                          className="icon-download"
+                        />{" "}
+                        Export CSV
                       </a>
                     )}
                   </div>
@@ -1905,7 +2289,11 @@ function App() {
                         disabled={txPage === 1}
                         onClick={() => setTxPage((p) => p - 1)}
                       >
-                        <ChevronLeft size={17} />
+                        <ChevronLeft
+                          size={17}
+                          aria-hidden="true"
+                          focusable="false"
+                        />
                       </button>
                       <span>Page {txPage}</span>
                       <button
@@ -1914,7 +2302,11 @@ function App() {
                         disabled={txPage * 15 >= data.total}
                         onClick={() => setTxPage((p) => p + 1)}
                       >
-                        <ChevronRight size={17} />
+                        <ChevronRight
+                          size={17}
+                          aria-hidden="true"
+                          focusable="false"
+                        />
                       </button>
                     </div>
                   </div>
@@ -1946,11 +2338,23 @@ function App() {
                         <section className="panel account-card" key={a.id}>
                           <span className={`account-icon ${a.channel}`}>
                             {a.channel === "cash" ? (
-                              <Banknote size={22} />
+                              <Banknote
+                                size={22}
+                                aria-hidden="true"
+                                focusable="false"
+                              />
                             ) : a.channel === "mobile" ? (
-                              <Smartphone size={22} />
+                              <Smartphone
+                                size={22}
+                                aria-hidden="true"
+                                focusable="false"
+                              />
                             ) : (
-                              <Landmark size={22} />
+                              <Landmark
+                                size={22}
+                                aria-hidden="true"
+                                focusable="false"
+                              />
                             )}
                           </span>
                           <Badge value={a.channel} />
@@ -1972,7 +2376,7 @@ function App() {
                           >
                             {a.active ? "Active" : "Inactive"}
                           </span>
-                          {(finance || user.role === "admin") && (
+                          {can("finance.account.update") && (
                             <button
                               className="button secondary small"
                               onClick={() =>
@@ -2035,13 +2439,16 @@ function App() {
                       Payments allocated separately
                     </span>
                   </div>
-                  {finance && (
+                  {finance && can("finance.invoice.create") && (
                     <ItemisedInvoice
                       {...shared}
                       customers={master.contacts.filter(
                         (c: Row) => c.type === "customer",
                       )}
                     />
+                  )}
+                  {can("finance.invoice.update") && (
+                    <InvoiceAssigner {...workspaceProps} invoices={data} />
                   )}
                   <div
                     className="table-scroll"
@@ -2052,7 +2459,7 @@ function App() {
                     <p className="scroll-hint">
                       Scroll sideways to view all columns.
                     </p>
-                    <table>
+                    <table className="invoice-register">
                       <thead>
                         <tr>
                           <th>Invoice / customer</th>
@@ -2060,7 +2467,7 @@ function App() {
                           <th>Status</th>
                           <th className="right">Amount</th>
                           <th className="right">Outstanding</th>
-                          <th>History / actions</th>
+                          <th>Details / actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2070,17 +2477,22 @@ function App() {
                               <strong className="table-main">{i.number}</strong>
                               <small>{i.customer}</small>
                             </td>
-                            <td>{i.due}</td>
+                            <td className="invoice-date">
+                              <time dateTime={i.due}>{i.due}</time>
+                            </td>
                             <td>
                               <Badge value={i.status} />
                             </td>
-                            <td className="right">{fmt(i.amount)}</td>
-                            <td className="right amount">
+                            <td className="right invoice-money">
+                              {fmt(i.amount)}
+                            </td>
+                            <td className="right amount invoice-money">
                               {fmt(i.outstanding)}
                             </td>
                             {
                               <td>
                                 {finance &&
+                                  can("finance.invoice.allocate") &&
                                   i.lifecycle === "issued" &&
                                   i.status !== "paid" && (
                                     <button
@@ -2109,23 +2521,54 @@ function App() {
                                       }
                                     >
                                       Allocate payment
-                                      <ArrowRight size={13} />
+                                      <ArrowRight
+                                        size={13}
+                                        aria-hidden="true"
+                                        focusable="false"
+                                      />
                                     </button>
                                   )}
-                                <InvoiceActions {...shared} invoice={i} />
+                                <details className="invoice-record-details">
+                                  <summary>
+                                    View details
+                                    <span className="sr-only">
+                                      {" "}
+                                      for invoice {i.number}
+                                    </span>
+                                  </summary>
+                                  <div className="invoice-detail-summary">
+                                    <strong>{i.number}</strong>
+                                    <span>{i.customer}</span>
+                                    <span>Due {i.due}</span>
+                                    <span>Amount: SLE {fmt(i.amount)}</span>
+                                    <span>
+                                      Outstanding: SLE {fmt(i.outstanding)}
+                                    </span>
+                                  </div>
+                                  <InvoiceActions {...shared} invoice={i} />
+                                </details>
                               </td>
                             }
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                    {!data.length && <Empty />}
+                    {!data.length && (
+                      <Empty
+                        title="No invoices in this view"
+                        description={
+                          user.role === "auditor"
+                            ? "Invoices recorded by authorised staff will appear here for review. Check the selected date scope if you expected records."
+                            : "Customer invoices will appear here once recorded. Check the selected date scope if you expected records."
+                        }
+                      />
+                    )}
                   </div>
                 </section>
               )}
               {page === "Statements" && (
                 <>
-                  {finance && (
+                  {finance && can("finance.statement.import") && (
                     <section className="panel import-panel">
                       <div className="panel-header">
                         <CardTitle icon={Upload}>
@@ -2140,7 +2583,7 @@ function App() {
                         </span>
                       </div>
                       <form
-                        className="import-form"
+                        className="import-form finbiz-form"
                         onSubmit={async (e) => {
                           e.preventDefault();
                           if (!importFile) return;
@@ -2166,7 +2609,12 @@ function App() {
                         }}
                       >
                         <div className="upload-area">
-                          <Upload size={28} />
+                          <Upload
+                            size={28}
+                            aria-hidden="true"
+                            focusable="false"
+                            className="icon-upload"
+                          />
                           <h3>Bring your statement into focus</h3>
                           <p>
                             Dates: YYYY-MM-DD · Directions: in / out · Amounts:
@@ -2241,7 +2689,11 @@ function App() {
                           </span>
                           <button className="button" disabled={importBusy}>
                             {importBusy ? "Reading file…" : "Preview statement"}
-                            <Eye size={16} />
+                            <Eye
+                              size={16}
+                              aria-hidden="true"
+                              focusable="false"
+                            />
                           </button>
                         </div>
                       </form>
@@ -2263,30 +2715,40 @@ function App() {
                         >
                           Download validation errors
                         </a>
-                        {preview.status === "preview" && finance && (
-                          <button
-                            className="button"
-                            disabled={importBusy || !preview.rows.length}
-                            onClick={async () => {
-                              setImportBusy(true);
-                              try {
-                                await api(
-                                  `/imports/${preview.id}/commit`,
-                                  "POST",
-                                );
-                                setPreview({ ...preview, status: "committed" });
-                                refresh("Valid statement rows imported");
-                              } catch (err) {
-                                setError((err as Error).message);
-                              } finally {
-                                setImportBusy(false);
-                              }
-                            }}
-                          >
-                            <Check size={17} />
-                            Confirm {preview.rows.length} valid rows
-                          </button>
-                        )}
+                        {preview.status === "preview" &&
+                          finance &&
+                          can("finance.statement.commit") && (
+                            <button
+                              className="button"
+                              disabled={importBusy || !preview.rows.length}
+                              onClick={async () => {
+                                setImportBusy(true);
+                                try {
+                                  await api(
+                                    `/imports/${preview.id}/commit`,
+                                    "POST",
+                                  );
+                                  setPreview({
+                                    ...preview,
+                                    status: "committed",
+                                  });
+                                  refresh("Valid statement rows imported");
+                                } catch (err) {
+                                  setError((err as Error).message);
+                                } finally {
+                                  setImportBusy(false);
+                                }
+                              }}
+                            >
+                              <Check
+                                size={17}
+                                aria-hidden="true"
+                                focusable="false"
+                                className="icon-check"
+                              />
+                              Confirm {preview.rows.length} valid rows
+                            </button>
+                          )}
                       </div>
                       {preview.warnings?.length > 0 && (
                         <div className="panel-note">
@@ -2351,7 +2813,12 @@ function App() {
                         download
                       >
                         Sample CSV
-                        <Download size={14} />
+                        <Download
+                          size={14}
+                          aria-hidden="true"
+                          focusable="false"
+                          className="icon-download"
+                        />
                       </a>
                     </div>
                     <div
@@ -2400,7 +2867,12 @@ function App() {
                                     }
                                   }}
                                 >
-                                  View preview <Eye size={14} />
+                                  View preview{" "}
+                                  <Eye
+                                    size={14}
+                                    aria-hidden="true"
+                                    focusable="false"
+                                  />
                                 </button>
                               </td>
                             </tr>
@@ -2509,78 +2981,89 @@ function App() {
                                 )}
                               </td>
                               <td>
-                                {finance && l.status === "suggested" && (
-                                  <button
-                                    className="button secondary small"
-                                    onClick={() =>
-                                      form(
-                                        "Confirm exact match",
-                                        [
+                                {finance &&
+                                  can("finance.reconciliation.execute") &&
+                                  l.status === "suggested" && (
+                                    <button
+                                      className="button secondary small"
+                                      onClick={() =>
+                                        form(
+                                          "Confirm exact match",
+                                          [
+                                            {
+                                              name: "reason",
+                                              label: "Review note",
+                                              type: "textarea",
+                                              value:
+                                                "Reviewed reference, amount, date, account and direction.",
+                                            },
+                                          ],
+                                          "/reconciliation",
                                           {
-                                            name: "reason",
-                                            label: "Review note",
-                                            type: "textarea",
-                                            value:
-                                              "Reviewed reference, amount, date, account and direction.",
+                                            line_id: l.id,
+                                            transaction_id: l.candidates[0].id,
                                           },
-                                        ],
-                                        "/reconciliation",
-                                        {
-                                          line_id: l.id,
-                                          transaction_id: l.candidates[0].id,
-                                        },
-                                      )
-                                    }
-                                  >
-                                    <Check size={15} />
-                                    Confirm
-                                  </button>
-                                )}
-                                {finance && l.status === "suggested" && (
-                                  <button
-                                    className="button secondary small"
-                                    onClick={() =>
-                                      form(
-                                        "Reject exact suggestion",
-                                        [
+                                        )
+                                      }
+                                    >
+                                      <Check
+                                        size={15}
+                                        aria-hidden="true"
+                                        focusable="false"
+                                        className="icon-check"
+                                      />
+                                      Confirm
+                                    </button>
+                                  )}
+                                {finance &&
+                                  can("finance.reconciliation.execute") &&
+                                  l.status === "suggested" && (
+                                    <button
+                                      className="button secondary small"
+                                      onClick={() =>
+                                        form(
+                                          "Reject exact suggestion",
+                                          [
+                                            {
+                                              name: "reason",
+                                              label:
+                                                "Why this suggestion is incorrect",
+                                              type: "textarea",
+                                            },
+                                          ],
+                                          "/reconciliation/suggestions/reject",
                                           {
-                                            name: "reason",
-                                            label:
-                                              "Why this suggestion is incorrect",
-                                            type: "textarea",
+                                            line_id: l.id,
+                                            transaction_id: l.candidates[0].id,
                                           },
-                                        ],
-                                        "/reconciliation/suggestions/reject",
-                                        {
-                                          line_id: l.id,
-                                          transaction_id: l.candidates[0].id,
-                                        },
-                                      )
-                                    }
-                                  >
-                                    Reject suggestion
-                                  </button>
-                                )}
-                                {finance && l.reconciliation_id && (
-                                  <button
-                                    className="button secondary small"
-                                    onClick={() =>
-                                      form(
-                                        "Undo reconciliation",
-                                        [
-                                          {
-                                            name: "reason",
-                                            label: "Reason",
-                                            type: "textarea",
-                                          },
-                                        ],
-                                        `/reconciliation/${l.reconciliation_id}/undo`,
-                                      )
-                                    }
-                                  >
-                                    Undo
-                                  </button>
-                                )}
+                                        )
+                                      }
+                                    >
+                                      Reject suggestion
+                                    </button>
+                                  )}
+                                {finance &&
+                                  can("finance.reconciliation.undo") &&
+                                  l.reconciliation_id && (
+                                    <button
+                                      className="button secondary small"
+                                      onClick={() =>
+                                        form(
+                                          "Undo reconciliation",
+                                          [
+                                            {
+                                              name: "reason",
+                                              label: "Reason",
+                                              type: "textarea",
+                                            },
+                                          ],
+                                          `/reconciliation/${l.reconciliation_id}/undo`,
+                                        )
+                                      }
+                                    >
+                                      Undo
+                                    </button>
+                                  )}
                               </td>
                             </tr>
                           ))}
@@ -2632,18 +3115,25 @@ function App() {
                   {data.map((t: Row) => (
                     <article className="approval-card" key={t.id}>
                       <span className="stat-icon amber">
-                        <ShieldCheck size={22} />
+                        <ShieldCheck
+                          size={22}
+                          aria-hidden="true"
+                          focusable="false"
+                        />
                       </span>
                       <div>
                         <h3>{t.description}</h3>
                         <p>
-                          {t.user_name} · {t.date} · {t.account_name}
+                          <UserIdentity
+                            name={t.user_name}
+                            src={t.user_image_url}
+                          />{" "}
+                          · {t.date} · {t.account_name}
                         </p>
                         <small>{t.reference}</small>
                       </div>
                       <strong>SLE {fmt(t.amount)}</strong>
-                      {(user.role === "manager" ||
-                        master.permissions?.can_approve) &&
+                      {master.permissions?.can_approve &&
                       t.user_id !== user.id ? (
                         <div className="approval-actions">
                           {["approved", "rejected"].map((decision) => (
@@ -2704,7 +3194,11 @@ function App() {
                 <>
                   <div className="report-intro">
                     <span className="report-icon">
-                      <ChartNoAxesCombined size={32} />
+                      <ChartNoAxesCombined
+                        size={32}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     </span>
                     <div>
                       <h2>From records to decisions.</h2>
@@ -2727,7 +3221,11 @@ function App() {
                       >
                         <div className="stat-label">
                           <span className="stat-icon blue">
-                            <ChartNoAxesCombined size={19} />
+                            <ChartNoAxesCombined
+                              size={19}
+                              aria-hidden="true"
+                              focusable="false"
+                            />
                           </span>
                           <span className="stat-title">{label}</span>
                         </div>
@@ -2757,7 +3255,12 @@ function App() {
                           key={format}
                         >
                           <span className="card-icon" aria-hidden="true">
-                            <FileText size={22} />
+                            <FileText
+                              size={22}
+                              aria-hidden="true"
+                              focusable="false"
+                              className="icon-file-text"
+                            />
                           </span>
                           <h2>{title}</h2>
                           <p>{description}</p>
@@ -2765,7 +3268,12 @@ function App() {
                             className="button secondary"
                             href={exportUrl(format)}
                           >
-                            <Download size={16} />
+                            <Download
+                              size={16}
+                              aria-hidden="true"
+                              focusable="false"
+                              className="icon-download"
+                            />
                             Download {format.toUpperCase()}
                           </a>
                         </section>
@@ -2783,7 +3291,11 @@ function App() {
                       <p>Latest 200 immutable audit events</p>
                     </CardTitle>
                     <span className="subtle-tag">
-                      <LockKeyhole size={13} />
+                      <LockKeyhole
+                        size={13}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                       Append-only
                     </span>
                   </div>
@@ -2867,7 +3379,12 @@ function App() {
                               </strong>
                               <small className="truncate">{a.entity}</small>
                             </td>
-                            <td>{a.user_name || "System"}</td>
+                            <td>
+                              <UserIdentity
+                                name={a.user_name}
+                                src={a.user_image_url}
+                              />
+                            </td>
                             <td className="nowrap">{a.created_at}</td>
                             <td>
                               <details>
@@ -2891,6 +3408,9 @@ function App() {
               {page === "Settings" && data && (
                 <>
                   {user.role === "manager" && <ApprovalPolicy {...shared} />}
+                  {can("finance.approval_policy.configure") && (
+                    <ApprovalLimits {...workspaceProps} />
+                  )}
                   {user.role === "admin" && <AdminConfiguration {...shared} />}
                   {finance && (
                     <ReferenceCategories
@@ -2913,7 +3433,12 @@ function App() {
                           className="button secondary small"
                           href="/api/backup"
                         >
-                          <Download size={16} />
+                          <Download
+                            size={16}
+                            aria-hidden="true"
+                            focusable="false"
+                            className="icon-download"
+                          />
                           Download consistent backup
                         </a>
                       </div>
@@ -2970,7 +3495,11 @@ function App() {
                         className="button secondary"
                         onClick={changePassword}
                       >
-                        <LockKeyhole size={16} />
+                        <LockKeyhole
+                          size={16}
+                          aria-hidden="true"
+                          focusable="false"
+                        />
                         Change password
                       </button>
                       {user.role === "admin" && (
@@ -3003,7 +3532,11 @@ function App() {
                             )
                           }
                         >
-                          <Plus size={16} />
+                          <Plus
+                            size={16}
+                            aria-hidden="true"
+                            focusable="false"
+                          />
                           Create user
                         </button>
                       )}
@@ -3020,76 +3553,77 @@ function App() {
                           </p>
                         </CardTitle>
                       </div>
-                      {user.role === "manager" && (
-                        <div className="period-actions">
-                          <button
-                            className="button secondary small"
-                            onClick={() =>
-                              setModal(
-                                <FormModal
-                                  title="Close reporting period"
-                                  fields={[
-                                    {
-                                      name: "month",
-                                      label: "Month",
-                                      type: "month",
-                                      value: today().slice(0, 7),
-                                    },
-                                    {
-                                      name: "reason",
-                                      label: "Reason",
-                                      type: "textarea",
-                                    },
-                                  ]}
-                                  onClose={() => setModal(null)}
-                                  onSubmit={async (v) => {
-                                    await api("/periods", "POST", {
-                                      ...v,
-                                      closed: true,
-                                    });
-                                    refresh("Period closed");
-                                  }}
-                                />,
-                              )
-                            }
-                          >
-                            Close period
-                          </button>
-                          <button
-                            className="button secondary small"
-                            onClick={() =>
-                              setModal(
-                                <FormModal
-                                  title="Reopen reporting period"
-                                  fields={[
-                                    {
-                                      name: "month",
-                                      label: "Month",
-                                      type: "month",
-                                      value: today().slice(0, 7),
-                                    },
-                                    {
-                                      name: "reason",
-                                      label: "Reason",
-                                      type: "textarea",
-                                    },
-                                  ]}
-                                  onClose={() => setModal(null)}
-                                  onSubmit={async (v) => {
-                                    await api("/periods", "POST", {
-                                      ...v,
-                                      closed: false,
-                                    });
-                                    refresh("Period reopened");
-                                  }}
-                                />,
-                              )
-                            }
-                          >
-                            Reopen period
-                          </button>
-                        </div>
-                      )}
+                      {user.role === "manager" &&
+                        can("finance.period.close") && (
+                          <div className="period-actions">
+                            <button
+                              className="button secondary small"
+                              onClick={() =>
+                                setModal(
+                                  <FormModal
+                                    title="Close reporting period"
+                                    fields={[
+                                      {
+                                        name: "month",
+                                        label: "Month",
+                                        type: "month",
+                                        value: today().slice(0, 7),
+                                      },
+                                      {
+                                        name: "reason",
+                                        label: "Reason",
+                                        type: "textarea",
+                                      },
+                                    ]}
+                                    onClose={() => setModal(null)}
+                                    onSubmit={async (v) => {
+                                      await api("/periods", "POST", {
+                                        ...v,
+                                        closed: true,
+                                      });
+                                      refresh("Period closed");
+                                    }}
+                                  />,
+                                )
+                              }
+                            >
+                              Close period
+                            </button>
+                            <button
+                              className="button secondary small"
+                              onClick={() =>
+                                setModal(
+                                  <FormModal
+                                    title="Reopen reporting period"
+                                    fields={[
+                                      {
+                                        name: "month",
+                                        label: "Month",
+                                        type: "month",
+                                        value: today().slice(0, 7),
+                                      },
+                                      {
+                                        name: "reason",
+                                        label: "Reason",
+                                        type: "textarea",
+                                      },
+                                    ]}
+                                    onClose={() => setModal(null)}
+                                    onSubmit={async (v) => {
+                                      await api("/periods", "POST", {
+                                        ...v,
+                                        closed: false,
+                                      });
+                                      refresh("Period reopened");
+                                    }}
+                                  />,
+                                )
+                              }
+                            >
+                              Reopen period
+                            </button>
+                          </div>
+                        )}
                       {data.periods.length ? (
                         <div
                           className="table-scroll"
@@ -3137,8 +3671,8 @@ function App() {
           )}
           <footer className="page-footer">
             <span>
-              <span className="footer-logo">f.</span>FinBiz 360 · A clearer
-              picture of your business.
+              <BrandLogo className="footer-brand-logo" />
+              FinBiz 360 · A clearer picture of your business.
             </span>
             <span>Internal financial workspace · SLE</span>
           </footer>
@@ -3146,8 +3680,18 @@ function App() {
       </main>
       {modal}
       {toast && (
-        <div className="toast" role="status">
-          <Check size={18} />
+        <div
+          className="toast"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <Check
+            size={18}
+            aria-hidden="true"
+            focusable="false"
+            className="icon-check"
+          />
           {toast}
         </div>
       )}
@@ -3330,7 +3874,7 @@ function UserAdmin({
             )
           }
         >
-          <Plus size={16} /> Create user
+          <Plus size={16} aria-hidden="true" focusable="false" /> Create user
         </button>
       </div>
       <div className="filter-bar">
@@ -3414,8 +3958,11 @@ function UserAdmin({
             {users.map((u) => (
               <tr key={u.id}>
                 <td>
-                  <strong>{u.name}</strong>
-                  <small>{u.email}</small>
+                  <UserIdentity
+                    name={u.name}
+                    src={u.image_url}
+                    detail={u.email}
+                  />
                 </td>
                 <td>{roleLabel[u.role]}</td>
                 <td>
@@ -3495,6 +4042,15 @@ function UserAdmin({
 }
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <IconContext.Provider
+      value={{
+        size: 20,
+        weight: "regular",
+        "aria-hidden": true,
+        focusable: false,
+      }}
+    >
+      <App />
+    </IconContext.Provider>
   </React.StrictMode>,
 );

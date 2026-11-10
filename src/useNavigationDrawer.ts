@@ -8,7 +8,7 @@ export default function useNavigationDrawer(open: boolean, close: () => void) {
   const [compact, setCompact] = useState(false);
   closeRef.current = close;
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 760px)");
+    const media = window.matchMedia("(max-width: 1024px)");
     const update = () => setCompact(media.matches);
     update();
     media.addEventListener("change", update);
@@ -51,7 +51,7 @@ export default function useNavigationDrawer(open: boolean, close: () => void) {
       }
     };
     const resize = () => {
-      if (window.matchMedia("(min-width: 761px)").matches) closeRef.current();
+      if (window.matchMedia("(min-width: 1025px)").matches) closeRef.current();
     };
     document.addEventListener("keydown", key);
     window.addEventListener("resize", resize);

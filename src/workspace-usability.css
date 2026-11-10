@@ -1,0 +1,170 @@
+/* Navigation stays vertically scrollable without a second horizontal scroll bar. */
+.app-shell.reference-workspace .sidebar nav {
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 8px 4px 4px;
+}
+.app-shell.reference-workspace .nav-group {
+  margin-bottom: 8px;
+}
+.app-shell.reference-workspace .nav-group-toggle {
+  width: calc(100% - 8px);
+  margin: 6px 4px 4px;
+  padding: 6px;
+  min-width: 0;
+  gap: 6px;
+}
+.app-shell.reference-workspace .nav-item {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  margin: 1px 0;
+  gap: 10px;
+}
+.app-shell.reference-workspace .nav-item-label {
+  min-width: 0;
+  flex: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.app-shell.reference-workspace .nav-icon {
+  flex-shrink: 0;
+}
+.reference-workspace .workspace-date {
+  display: inline-flex;
+  max-width: 250px;
+  min-width: 0;
+  white-space: normal;
+  text-align: left;
+}
+.workspace-date > svg {
+  flex-shrink: 0;
+}
+.calendar-scope-help {
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 10px 0;
+}
+.role-dashboard .role-metrics-primary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.role-more-figures {
+  max-width: none;
+  margin: 16px 0;
+}
+.role-more-figures > summary {
+  padding: 12px 4px;
+  color: var(--primary);
+  font-weight: 650;
+}
+.role-more-figures .role-metrics {
+  margin-top: 10px;
+}
+.role-dashboard .role-tools {
+  margin-bottom: 16px;
+}
+.role-tools .role-task-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.role-tools .role-task {
+  padding: 14px;
+  gap: 8px;
+}
+.role-tools .role-task-icon {
+  width: 36px;
+  height: 36px;
+}
+.role-recent-records {
+  min-width: 0;
+}
+.role-dashboard .metric-review-link {
+  display: block;
+  text-align: left;
+  padding: 6px 0;
+  margin-top: 8px;
+  min-height: 32px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  font: inherit;
+  font-size: var(--text-small);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.audit-event-code {
+  margin-top: 6px;
+  max-width: 100%;
+}
+.audit-event-code code {
+  overflow-wrap: anywhere;
+  font-size: var(--text-small);
+}
+.dashboard-priorities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 12px;
+  margin: 0 0 20px;
+}
+.dashboard-priorities button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface-raised);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.dashboard-priorities button strong {
+  font-variant-numeric: tabular-nums;
+}
+.dashboard-scope-description {
+  margin: 0 0 16px;
+  font-size: var(--text-small);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.empty .button {
+  margin-top: 12px;
+}
+@media (min-width: 1350px) {
+  .role-tools .role-task-grid {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+}
+@media (max-width: 1200px) {
+  .role-dashboard .role-metrics-primary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .role-tools .role-task-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .role-dashboard .role-metrics-primary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reference-workspace .workspace-date {
+    max-width: 180px;
+  }
+}
+@media (pointer: coarse) {
+  .app-shell.reference-workspace :is(.nav-item, .nav-group-toggle),
+  .role-dashboard .metric-review-link,
+  .role-more-figures > summary {
+    min-height: 44px;
+  }
+}

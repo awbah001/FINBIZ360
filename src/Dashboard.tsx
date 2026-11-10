@@ -1,28 +1,32 @@
+import SystemIcon from "./SystemIcon";
 import { useEffect, useId, useRef, useState } from "react";
 import { canOpenPage } from "./roleWorkspace";
+import WorkspaceCalendar from "./WorkspaceCalendar";
+import UserAvatar from "./UserAvatar";
+import { dateScopeLabel } from "./workspacePresentation";
 import {
   ArrowDownLeft,
-  ArrowLeftRight,
+  ArrowsLeftRight as ArrowLeftRight,
   ArrowRight,
   ArrowUpRight,
   Bell,
-  CalendarDays,
-  ChartNoAxesCombined,
+  CalendarBlank as CalendarDays,
+  ChartLineUp as ChartNoAxesCombined,
   Check,
-  CircleAlert,
-  Clock3,
+  WarningCircle as CircleAlert,
+  Clock as Clock3,
   FileText,
-  Landmark,
+  Bank as Landmark,
   Lightbulb,
-  Menu,
+  List as Menu,
   Plus,
-  RefreshCw,
-  Search,
-  Upload,
+  ArrowsClockwise as RefreshCw,
+  MagnifyingGlass as Search,
+  UploadSimple as Upload,
   Users,
   Wallet,
-  Zap,
-} from "lucide-react";
+  Lightning as Zap,
+} from "@phosphor-icons/react";
 
 type Row = Record<string, any>;
 type Money = (value?: string | number) => string;
@@ -141,7 +145,7 @@ export function WorkspaceTopbar({
         aria-controls="workspace-navigation"
         onClick={onMenu}
       >
-        <Menu />
+        <Menu aria-hidden="true" focusable="false" />
       </button>
       {user.role !== "admin" && (
         <form
@@ -153,7 +157,7 @@ export function WorkspaceTopbar({
             onSearch(search.trim());
           }}
         >
-          <Search size={20} aria-hidden="true" />
+          <Search size={20} aria-hidden="true" focusable="false" />
           <input
             ref={input}
             aria-label="Search transactions, contacts and documents"
@@ -169,7 +173,7 @@ export function WorkspaceTopbar({
             onChange={(event) => setSearch(event.target.value)}
           />
           <button type="submit" aria-label="Search transactions">
-            <ArrowRight size={17} />
+            <ArrowRight size={17} aria-hidden="true" focusable="false" />
           </button>
           {searchError && (
             <span className="global-search-error" role="status">
@@ -255,7 +259,7 @@ export function WorkspaceTopbar({
         </form>
       )}
       <div className="workspace-topbar-tools">
-        {onAccount && (
+        {onAccount && page !== "Transactions" && (
           <label className="header-account">
             <span>{company || "Company account"}</span>
             <select
@@ -278,7 +282,7 @@ export function WorkspaceTopbar({
           title="Refresh company records"
           onClick={onRefresh}
         >
-          <RefreshCw size={18} />
+          <RefreshCw size={21} aria-hidden="true" focusable="false" />
         </button>
         <div className="role-notifications">
           <button
@@ -287,7 +291,7 @@ export function WorkspaceTopbar({
             aria-expanded={notificationOpen}
             onClick={() => setNotificationOpen((v) => !v)}
           >
-            <Bell size={23} />
+            <Bell size={21} aria-hidden="true" focusable="false" />
             {user.role === "manager" && pending > 0 && <span>{pending}</span>}
           </button>
           {notificationOpen && (
@@ -331,69 +335,134 @@ export function WorkspaceTopbar({
                 Based on saved records; these are recent events, not unread
                 messages.
               </small>
-            </section>
-          )}
-        </div>
-        {onFrom && onTo && (
-          <details className="header-date-controls">
-            <summary className="workspace-date">
-              <CalendarDays size={19} />
-              {new Intl.DateTimeFormat("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                timeZone: "Africa/Freetown",
-              }).format(new Date())}
-            </summary>
-            <div className="header-date-popover">
-              <label>
-                From
-                <input
-                  type="date"
-                  value={from}
-                  onChange={(e) => onFrom?.(e.target.value)}
-                />
-              </label>
-              <label>
-                To
-                <input
-                  type="date"
-                  min={from || undefined}
-                  value={to}
-                  onChange={(e) => onTo?.(e.target.value)}
-                />
-              </label>
               <button
                 className="button secondary small"
                 onClick={() => {
-                  onFrom?.("");
-                  onTo?.("");
+                  setNotificationOpen(false);
+                  onNavigate("Notifications");
                 }}
               >
-                All recorded dates
+                Open notification centre
               </button>
-            </div>
-          </details>
-        )}
-        <button
-          className="workspace-profile"
-          aria-label={`Open profile for ${user.name}`}
-          title={user.name}
-          onClick={() => onNavigate("Profile")}
+            </section>
+          )}
+        </div>
+        <details
+          className="header-date-controls"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector("summary")?.focus();
+            }
+          }}
         >
-          {String(user.name)
-            .split(" ")
-            .map((word) => word[0])
-            .slice(0, 2)
-            .join("")}
-          <span />
-        </button>
+          <summary
+            className="workspace-date"
+            aria-label={
+              onFrom && onTo
+                ? `Date filter: ${dateScopeLabel(from, to)}`
+                : "Open reference calendar"
+            }
+          >
+            <CalendarDays size={19} aria-hidden="true" focusable="false" />
+            <span>
+              {onFrom && onTo ? dateScopeLabel(from, to) : "Calendar"}
+            </span>
+          </summary>
+          <div className="header-date-popover">
+            <p className="calendar-scope-help">
+              {onFrom && onTo
+                ? "Choose a day to filter records, or enter a date range below."
+                : "Reference calendar. Choosing a day does not filter this page."}
+            </p>
+            <WorkspaceCalendar
+              selected={from}
+              from={from}
+              to={to}
+              onSelect={
+                onFrom && onTo
+                  ? (day) => {
+                      onFrom(day);
+                      onTo(day);
+                    }
+                  : undefined
+              }
+            />
+            {onFrom && onTo && (
+              <div className="calendar-range-fields">
+                <label>
+                  From
+                  <input
+                    type="date"
+                    value={from}
+                    onChange={(e) => onFrom?.(e.target.value)}
+                  />
+                </label>
+                <label>
+                  To
+                  <input
+                    type="date"
+                    min={from || undefined}
+                    value={to}
+                    onChange={(e) => onTo?.(e.target.value)}
+                  />
+                </label>
+                <button
+                  className="button secondary small"
+                  onClick={() => {
+                    onFrom?.("");
+                    onTo?.("");
+                  }}
+                >
+                  All recorded dates
+                </button>
+              </div>
+            )}
+          </div>
+        </details>
+        <details
+          className="workspace-profile-menu"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.currentTarget.open = false;
+              event.currentTarget.querySelector("summary")?.focus();
+            }
+          }}
+        >
+          <summary
+            className="workspace-profile"
+            aria-label={`Account menu for ${user.name}`}
+            title={user.name}
+          >
+            <UserAvatar name={user.name} src={user.image_url} />
+            <span className="workspace-profile-status" aria-hidden="true" />
+          </summary>
+          <div className="workspace-profile-links">
+            <strong>{user.name}</strong>
+            <button
+              onClick={(event) => {
+                event.currentTarget.closest("details")!.open = false;
+                onNavigate("Profile");
+              }}
+            >
+              My profile and password
+            </button>
+            <button
+              onClick={(event) => {
+                event.currentTarget.closest("details")!.open = false;
+                onNavigate("Notifications");
+              }}
+            >
+              Notifications
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );
 }
 
-function FinancialChart({
+export function FinancialChart({
   trend,
   money,
   mini = false,
@@ -409,7 +478,7 @@ function FinancialChart({
   if (!rows.length)
     return mini ? null : (
       <div className="dashboard-chart-empty">
-        <ChartNoAxesCombined size={36} />
+        <ChartNoAxesCombined size={36} aria-hidden="true" focusable="false" />
         <strong>Your financial picture starts here</strong>
         <p>
           Record accepted transactions to see your income and expenses over
@@ -546,7 +615,12 @@ function WorkspaceArt() {
     <div className="welcome-art" aria-hidden="true">
       <div className="welcome-laptop">
         <div>
-          <ChartNoAxesCombined size={88} strokeWidth={1.5} />
+          <ChartNoAxesCombined
+            size={40}
+            weight="duotone"
+            aria-hidden="true"
+            focusable="false"
+          />
         </div>
         <span />
       </div>
@@ -579,6 +653,8 @@ export default function Dashboard({
   onAccount,
   lastUpdated,
   demo,
+  scopeDescription = "All accounts · All recorded dates",
+  onReviewTransactions,
 }: {
   overview: Row;
   user: Row;
@@ -598,6 +674,8 @@ export default function Dashboard({
   onAccount: (v: string) => void;
   lastUpdated: Date | null;
   demo: boolean;
+  scopeDescription?: string;
+  onReviewTransactions?: (filters: Record<string, string>) => void;
 }) {
   const net = BigInt(overview.net);
   const metrics = [
@@ -684,9 +762,9 @@ export default function Dashboard({
         <WorkspaceArt />
         {canRecord && (
           <button className="welcome-record button" onClick={onRecord}>
-            <Plus size={20} />
+            <Plus size={20} aria-hidden="true" focusable="false" />
             Record Transaction
-            <ArrowRight size={17} />
+            <ArrowRight size={17} aria-hidden="true" focusable="false" />
           </button>
         )}
       </section>
@@ -710,15 +788,22 @@ export default function Dashboard({
           </button>
         </section>
       )}
+      <p className="dashboard-scope-description">
+        <strong>Showing:</strong> {scopeDescription}
+      </p>
       <div className="reference-metrics">
         {metrics.map(({ title, value, icon: Icon, tone, foot, field }, i) => (
           <section
             className={`reference-metric effect-card tone-${tone}`}
             key={title}
           >
-            <span className="metric-icon">
-              <Icon size={29} />
-            </span>
+            <SystemIcon
+              icon={Icon}
+              tone={tone}
+              variant="metric"
+              className="metric-icon"
+              size={25}
+            />
             <div className="metric-copy">
               <h2>{title}</h2>
               <strong>{value}</strong>
@@ -735,12 +820,44 @@ export default function Dashboard({
           </section>
         ))}
       </div>
+      <section className="dashboard-priorities" aria-label="Review priorities">
+        <button
+          type="button"
+          onClick={() =>
+            onReviewTransactions
+              ? onReviewTransactions({ approval: "pending" })
+              : onNavigate("Approvals")
+          }
+        >
+          <span>Payments awaiting approval</span>
+          <strong>{overview.pending || 0}</strong>
+        </button>
+        <button type="button" onClick={() => onNavigate("Exceptions")}>
+          <span>Unresolved exceptions</span>
+          <strong>{overview.pending_exceptions || 0}</strong>
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            onReviewTransactions
+              ? onReviewTransactions({ status: "unmatched" })
+              : onNavigate("Reconciliation")
+          }
+        >
+          <span>Unmatched records</span>
+          <strong>{overview.unmatched || 0}</strong>
+        </button>
+      </section>
       <div className="reference-dashboard-grid">
         <section className="reference-panel financial-panel">
           <header>
             <div className="reference-panel-title">
               <span className="panel-symbol">
-                <ChartNoAxesCombined size={27} />
+                <ChartNoAxesCombined
+                  size={27}
+                  aria-hidden="true"
+                  focusable="false"
+                />
               </span>
               <div>
                 <h2>Financial Overview</h2>
@@ -749,7 +866,7 @@ export default function Dashboard({
             </div>
             <details className="dashboard-range">
               <summary>
-                <CalendarDays size={15} />
+                <CalendarDays size={15} aria-hidden="true" focusable="false" />
                 {from || to ? "Custom period" : "All dates"}
               </summary>
               <div className="dashboard-range-popover">
@@ -816,7 +933,12 @@ export default function Dashboard({
         <section className="reference-panel insights-panel">
           <header>
             <div className="reference-panel-title">
-              <Lightbulb size={27} className="insights-bulb" />
+              <Lightbulb
+                size={27}
+                className="insights-bulb"
+                aria-hidden="true"
+                focusable="false"
+              />
               <h2>Business Insights</h2>
             </div>
             {readAll && (
@@ -825,12 +947,16 @@ export default function Dashboard({
                 onClick={() => onNavigate("Reports")}
               >
                 View More
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             )}
           </header>
           <div className="cash-insight">
-            <ChartNoAxesCombined size={43} />
+            <ChartNoAxesCombined
+              size={43}
+              aria-hidden="true"
+              focusable="false"
+            />
             <div>
               <h3>
                 {net > 0n
@@ -849,48 +975,68 @@ export default function Dashboard({
             </div>
           </div>
           <div className="insight-rows">
+            {overview.forecast && (
+              <div className="dashboard-forecast-note">
+                <h3>Cash-flow forecast</h3>
+                <p>
+                  {overview.forecast.available
+                    ? `Next seven days: SLE ${money(overview.forecast.points.reduce((sum: bigint, point: Row) => sum + BigInt(point.net), 0n).toString())} estimated net movement.`
+                    : overview.forecast.reason}
+                </p>
+                <button
+                  className="button secondary small"
+                  onClick={() => onNavigate("Analytics")}
+                >
+                  Review forecast and assumptions
+                </button>
+              </div>
+            )}
             {readAll && (
               <button onClick={() => onNavigate("Approvals")}>
                 <span className="insight-icon alert">
-                  <CircleAlert size={19} />
+                  <CircleAlert size={19} aria-hidden="true" focusable="false" />
                 </span>
                 <span>{overview.pending} payments awaiting approval.</span>
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             )}
             {readAll && (
               <button onClick={() => onNavigate("Reconciliation")}>
                 <span className="insight-icon">
-                  <RefreshCw size={19} />
+                  <RefreshCw size={19} aria-hidden="true" focusable="false" />
                 </span>
                 <span>
                   {overview.reconciled} records reconciled in this view.
                 </span>
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             )}
             <button onClick={() => onNavigate("Accounts")}>
               <span className="insight-icon success">
-                <Landmark size={19} />
+                <Landmark size={19} aria-hidden="true" focusable="false" />
               </span>
               <span>{accounts.length} financial accounts configured.</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={16} aria-hidden="true" focusable="false" />
             </button>
           </div>
         </section>
         <section className="reference-panel quick-actions-panel">
           <header>
             <div className="reference-panel-title">
-              <Zap size={25} />
+              <Zap size={25} aria-hidden="true" focusable="false" />
               <h2>Quick Actions</h2>
             </div>
           </header>
           <div className="reference-quick-actions">
             {actions.map(({ label, icon: Icon, action, tone }) => (
               <button key={label} className={`tone-${tone}`} onClick={action}>
-                <span className="metric-icon">
-                  <Icon size={27} />
-                </span>
+                <SystemIcon
+                  icon={Icon}
+                  tone={tone}
+                  variant="shortcut"
+                  className="metric-icon"
+                  size={24}
+                />
                 <strong>{label}</strong>
               </button>
             ))}
@@ -899,7 +1045,7 @@ export default function Dashboard({
         <section className="reference-panel activity-panel">
           <header>
             <div className="reference-panel-title">
-              <Clock3 size={25} />
+              <Clock3 size={25} aria-hidden="true" focusable="false" />
               <h2>Recent Activity</h2>
             </div>
             <button
@@ -907,7 +1053,7 @@ export default function Dashboard({
               onClick={() => onNavigate("Transactions")}
             >
               View All
-              <ArrowRight size={16} />
+              <ArrowRight size={16} aria-hidden="true" focusable="false" />
             </button>
           </header>
           {overview.recent.length ? (
@@ -918,9 +1064,17 @@ export default function Dashboard({
                     className={`activity-icon ${t.direction === "in" ? "receipt" : "payment"}`}
                   >
                     {t.direction === "in" ? (
-                      <ArrowDownLeft size={22} />
+                      <ArrowDownLeft
+                        size={22}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     ) : (
-                      <ArrowUpRight size={22} />
+                      <ArrowUpRight
+                        size={22}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     )}
                   </span>
                   <span>
@@ -941,12 +1095,12 @@ export default function Dashboard({
             </div>
           ) : (
             <div className="activity-empty">
-              <Clock3 size={26} />
+              <Clock3 size={26} aria-hidden="true" focusable="false" />
               <p>No transactions recorded yet.</p>
               {canRecord && (
                 <button className="reference-link" onClick={onRecord}>
                   Record your first transaction
-                  <ArrowRight size={15} />
+                  <ArrowRight size={15} aria-hidden="true" focusable="false" />
                 </button>
               )}
             </div>
@@ -956,7 +1110,7 @@ export default function Dashboard({
       {overview.accounts.length > 0 && (
         <details className="dashboard-account-summary">
           <summary>
-            <Landmark size={18} />
+            <Landmark size={18} aria-hidden="true" focusable="false" />
             Account balances & movement
           </summary>
           <div>
@@ -976,7 +1130,7 @@ export default function Dashboard({
                   <strong>SLE {money(item.closing || item.balance)}</strong>
                   <small>Movement: {money(item.balance)}</small>
                 </span>
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             ))}
           </div>
@@ -1015,13 +1169,18 @@ export default function Dashboard({
           className="dashboard-onboarding"
           onClick={() => onNavigate("Accounts")}
         >
-          <Plus size={18} />
+          <Plus size={18} aria-hidden="true" focusable="false" />
           <span>Add your first cash, bank or mobile money account</span>
-          <ArrowRight size={17} />
+          <ArrowRight size={17} aria-hidden="true" focusable="false" />
         </button>
       )}
       <p className="dashboard-sync">
-        <Check size={14} />
+        <Check
+          size={14}
+          aria-hidden="true"
+          focusable="false"
+          className="icon-check"
+        />
         {lastUpdated
           ? `Records updated ${lastUpdated.toLocaleTimeString("en-GB", { timeZone: "Africa/Freetown" })} · Refreshes every 15 seconds`
           : "Loading company records"}

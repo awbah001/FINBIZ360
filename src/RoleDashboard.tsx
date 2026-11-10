@@ -1,37 +1,41 @@
+import SystemIcon from "./SystemIcon";
+import { UserIdentity } from "./UserAvatar";
 import {
   ArrowRight,
   ArrowDownLeft,
-  ArrowLeftRight,
+  ArrowsLeftRight as ArrowLeftRight,
   Users,
-  UserX,
+  UserMinus as UserX,
   ShieldCheck,
-  Activity,
-  History,
+  Pulse as Activity,
+  ClipboardText as History,
   FileText,
-  GitCompareArrows,
-  CircleAlert,
-  Clock3,
+  ArrowsCounterClockwise as GitCompareArrows,
+  WarningCircle as CircleAlert,
+  Clock as Clock3,
   Wallet,
-  Building2,
-  Upload,
-  Settings,
-  ChartNoAxesCombined,
-  Search,
-  type LucideIcon,
-} from "lucide-react";
+  BuildingOffice as Building2,
+  UploadSimple as Upload,
+  Gear as Settings,
+  ChartLineUp as ChartNoAxesCombined,
+  MagnifyingGlass as Search,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
 import { roleWorkspaces } from "./roleWorkspace";
 import { HeroArt } from "./PageHero";
+import { FinancialChart } from "./Dashboard";
 import "./role-workspace.css";
+import { auditActionLabel } from "./workspacePresentation";
 
 type Row = Record<string, any>;
 type Metric = {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: PhosphorIcon;
   tone: string;
   note: string;
 };
-const destinations: Record<string, { icon: LucideIcon; tone: string }> = {
+const destinations: Record<string, { icon: PhosphorIcon; tone: string }> = {
   Users: { icon: Users, tone: "cyan" },
   Settings: { icon: Settings, tone: "slate" },
   "Audit trail": { icon: History, tone: "slate" },
@@ -44,17 +48,6 @@ const destinations: Record<string, { icon: LucideIcon; tone: string }> = {
   Reports: { icon: ChartNoAxesCombined, tone: "blue" },
   Approvals: { icon: ShieldCheck, tone: "amber" },
 };
-const eventNames: Record<string, string> = {
-  "auth.login": "Staff signed in",
-  "auth.logout": "Staff signed out",
-  "auth.password": "Password changed",
-  "auth.password_reset": "Password reset",
-  "user.create": "Staff account created",
-  "user.update": "Staff access updated",
-  "settings.update": "Organisation updated",
-  "backup.export": "Database backup downloaded",
-  "approval.delegate": "Approval delegation updated",
-};
 export default function RoleDashboard({
   user,
   overview,
@@ -65,6 +58,9 @@ export default function RoleDashboard({
   onExpense,
   lastUpdated = null,
   demo = false,
+  canRecord = true,
+  scopeDescription = "All accounts · All recorded dates",
+  onReviewTransactions,
 }: {
   user: Row;
   overview: Row;
@@ -75,21 +71,39 @@ export default function RoleDashboard({
   onExpense?: () => void;
   lastUpdated?: Date | null;
   demo?: boolean;
+  canRecord?: boolean;
+  scopeDescription?: string;
+  onReviewTransactions?: (filters: Record<string, string>) => void;
 }) {
   const workspace = roleWorkspaces[user.role];
   const admin = user.role === "admin",
     cashier = user.role === "cashier",
     auditor = user.role === "auditor";
+  const roleAccent: Record<string, string> = {
+    admin: "slate",
+    finance: "blue",
+    cashier: "green",
+    auditor: "purple",
+    manager: "teal",
+  };
+  const accent = roleAccent[user.role] || "teal";
   const metric = (
     title: string,
     value: string | number | undefined,
-    icon: LucideIcon,
+    icon: PhosphorIcon,
     tone: string,
     note: string,
   ): Metric => ({ title, value: value ?? 0, icon, tone, note });
   const daily = overview.daily || {};
   const metrics = admin
     ? [
+        metric(
+          "Total registered users",
+          overview.total_users,
+          Users,
+          "cyan",
+          "All registered staff accounts",
+        ),
         metric(
           "Active staff",
           overview.active_users,
@@ -122,11 +136,46 @@ export default function RoleDashboard({
     : cashier
       ? [
           metric(
+            "Today's sales",
+            `SLE ${money(daily.sales || "0")}`,
+            Wallet,
+            "blue",
+            "Receipted sales recorded today",
+          ),
+          metric(
+            "Cash received today",
+            `SLE ${money(daily.cash || "0")}`,
+            Wallet,
+            "green",
+            "Your cash receipts today",
+          ),
+          metric(
+            "Mobile money today",
+            `SLE ${money(daily.mobile || "0")}`,
+            Activity,
+            "cyan",
+            "Your mobile money receipts today",
+          ),
+          metric(
+            "Bank receipts today",
+            `SLE ${money(daily.bank || "0")}`,
+            Building2,
+            "blue",
+            "Your bank receipts today",
+          ),
+          metric(
             "My accepted receipts",
             `SLE ${money(overview.incoming)}`,
             ArrowDownLeft,
             "green",
             "Your receipts in the selected scope",
+          ),
+          metric(
+            "Sales recorded today",
+            daily.sales_count,
+            FileText,
+            "purple",
+            "Receipted sale count today",
           ),
           metric(
             "My transactions",
@@ -139,18 +188,11 @@ export default function RoleDashboard({
       : auditor
         ? [
             metric(
-              "Recorded transactions",
-              overview.count,
-              FileText,
-              "purple",
-              "Records in the selected scope",
-            ),
-            metric(
-              "Reconciled records",
-              overview.reconciled,
-              GitCompareArrows,
-              "green",
-              "Recorded evidence matches",
+              "Pending exceptions",
+              overview.pending_exceptions,
+              CircleAlert,
+              "rose",
+              "Unresolved exceptions in selected scope",
             ),
             metric(
               "Unmatched records",
@@ -165,6 +207,20 @@ export default function RoleDashboard({
               Clock3,
               "amber",
               "Awaiting an independent decision",
+            ),
+            metric(
+              "Reconciled records",
+              overview.reconciled,
+              GitCompareArrows,
+              "green",
+              "Recorded evidence matches",
+            ),
+            metric(
+              "Recorded transactions",
+              overview.count,
+              FileText,
+              "purple",
+              "Records in the selected scope",
             ),
           ]
         : [
@@ -196,138 +252,171 @@ export default function RoleDashboard({
               "orange",
               "Company documents in date range",
             ),
+            metric(
+              "Today's inflows",
+              `SLE ${money(daily.incoming || "0")}`,
+              ArrowDownLeft,
+              "green",
+              "Accepted inflows today within selected scope",
+            ),
+            metric(
+              "Today's outflows",
+              `SLE ${money(daily.outgoing || "0")}`,
+              ArrowLeftRight,
+              "orange",
+              "Accepted outflows today within selected scope",
+            ),
+            metric(
+              "Total recorded transactions",
+              overview.count,
+              FileText,
+              "purple",
+              "Transactions in selected scope",
+            ),
           ];
-  if (admin)
-    metrics.unshift(
+  const recent: Row[] =
+    (admin ? overview.recent_activity : overview.recent) || [];
+  if (cashier)
+    metrics.push(
       metric(
-        "Total registered users",
-        overview.total_users,
-        Users,
-        "cyan",
-        "All registered staff accounts",
+        "My total sales",
+        `SLE ${money(overview.total_sales || "0")}`,
+        Wallet,
+        "green",
+        "Accepted, unreversed sales in selected scope",
+      ),
+      metric(
+        "Assigned pending payments",
+        overview.pending_customer_payments,
+        Clock3,
+        "amber",
+        "Issued assigned invoices with an outstanding balance",
       ),
     );
-  if (cashier)
-    metrics.unshift(
+  if (user.role === "finance")
+    metrics.push(
       metric(
-        "Today's sales",
-        `SLE ${money(daily.sales || "0")}`,
-        Wallet,
-        "blue",
-        "Receipted sales recorded today",
-      ),
-      metric(
-        "Today's receipts",
-        `SLE ${money(daily.incoming || "0")}`,
+        "This month's income",
+        `SLE ${money(overview.monthly?.incoming || "0")}`,
         ArrowDownLeft,
         "green",
-        "All accepted incoming records today",
+        `${overview.monthly?.month || "Current month"}; respects selected filters`,
       ),
       metric(
-        "Cash received today",
-        `SLE ${money(daily.cash || "0")}`,
-        Wallet,
-        "green",
-        "Your cash receipts today",
-      ),
-      metric(
-        "Mobile money today",
-        `SLE ${money(daily.mobile || "0")}`,
-        Activity,
-        "cyan",
-        "Your mobile money receipts today",
-      ),
-      metric(
-        "Bank receipts today",
-        `SLE ${money(daily.bank || "0")}`,
-        Building2,
-        "blue",
-        "Your bank receipts today",
-      ),
-      metric(
-        "Sales recorded today",
-        daily.sales_count,
-        FileText,
-        "purple",
-        "Receipted sale count today",
+        "This month's expenses",
+        `SLE ${money(overview.monthly?.outgoing || "0")}`,
+        ArrowLeftRight,
+        "orange",
+        `${overview.monthly?.month || "Current month"}; respects selected filters`,
       ),
     );
   if (auditor)
     metrics.push(
       metric(
-        "Pending exceptions",
-        overview.pending_exceptions,
+        "Total income",
+        `SLE ${money(overview.incoming)}`,
+        Wallet,
+        "green",
+        "Accepted inflows in selected scope",
+      ),
+      metric(
+        "Total expenses",
+        `SLE ${money(overview.outgoing)}`,
+        Wallet,
+        "orange",
+        "Accepted outflows in selected scope",
+      ),
+      metric(
+        "Reconciliation completion",
+        `${Number(overview.reconciled || 0) + Number(overview.unmatched || 0) ? Math.round((Number(overview.reconciled || 0) * 100) / (Number(overview.reconciled || 0) + Number(overview.unmatched || 0))) : 0}%`,
+        GitCompareArrows,
+        "blue",
+        "Reconciled accepted records in selected scope",
+      ),
+      metric(
+        "Duplicate indicators",
+        overview.duplicate_indicators,
         CircleAlert,
         "rose",
-        "Unresolved exceptions in selected scope",
+        "Unresolved duplicate evidence indicators",
       ),
     );
-  if (!admin && !cashier && !auditor)
-    metrics.unshift(
-      metric(
-        "Total recorded transactions",
-        overview.count,
-        FileText,
-        "purple",
-        "Transactions in selected scope",
-      ),
-      metric(
-        "Today's inflows",
-        `SLE ${money(daily.incoming || "0")}`,
-        ArrowDownLeft,
-        "green",
-        "Accepted inflows today within selected scope",
-      ),
-      metric(
-        "Today's outflows",
-        `SLE ${money(daily.outgoing || "0")}`,
-        ArrowLeftRight,
-        "orange",
-        "Accepted outflows today within selected scope",
-      ),
-    );
-  const recent: Row[] =
-    (admin ? overview.recent_activity : overview.recent) || [];
+  const reviewFilters: Record<string, Record<string, string>> = {
+    "Unmatched records": { status: "unmatched" },
+    "Pending payments": { approval: "pending" },
+    "Reconciled records": { status: "reconciled" },
+    "Recorded transactions": {},
+    "Total recorded transactions": {},
+    "My transactions": {},
+  };
+  const renderMetric = ({ title, value, icon: Icon, tone, note }: Metric) => (
+    <section
+      className={`reference-metric effect-card tone-${tone}`}
+      key={title}
+    >
+      <SystemIcon
+        icon={Icon}
+        tone={tone}
+        variant="metric"
+        className="metric-icon"
+        size={25}
+      />
+      <div className="metric-copy">
+        <h2>{title}</h2>
+        <strong>{value}</strong>
+        <span className="metric-note">{note}</span>
+        {onReviewTransactions && reviewFilters[title] && (
+          <button
+            type="button"
+            className="metric-review-link"
+            onClick={() => onReviewTransactions(reviewFilters[title])}
+          >
+            View records<span className="sr-only">: {title}</span>
+          </button>
+        )}
+      </div>
+    </section>
+  );
   return (
     <div
       className={`reference-dashboard role-dashboard role-dashboard-${user.role}`}
     >
-      <section className="dashboard-welcome role-welcome">
+      <section className={`dashboard-welcome role-welcome tone-${accent}`}>
         <div className="role-welcome-copy">
           <span className="role-eyebrow">Welcome back, {user.name}</span>
           <h1>{workspace.title}</h1>
           <p>{workspace.description}</p>
           <div className="role-welcome-actions">
-            {["finance", "cashier"].includes(user.role) ? (
+            {["finance", "cashier"].includes(user.role) && canRecord ? (
               <button className="button" onClick={onRecord}>
-                <ArrowDownLeft size={18} aria-hidden="true" />
+                <ArrowDownLeft size={18} aria-hidden="true" focusable="false" />
                 {cashier ? "Record receipt" : "Record transaction"}
-                <ArrowRight size={16} aria-hidden="true" />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             ) : (
               <button
                 className="button"
                 onClick={() => onNavigate(admin ? "Users" : "Audit trail")}
               >
-                <ShieldCheck size={18} aria-hidden="true" />
+                <ShieldCheck size={18} aria-hidden="true" focusable="false" />
                 {admin ? "Manage staff access" : "Open audit trail"}
-                <ArrowRight size={16} aria-hidden="true" />
+                <ArrowRight size={16} aria-hidden="true" focusable="false" />
               </button>
             )}
-            {user.role === "finance" && onExpense && (
+            {user.role === "finance" && canRecord && onExpense && (
               <button className="button secondary" onClick={onExpense}>
-                <Wallet size={18} aria-hidden="true" />
+                <Wallet size={18} aria-hidden="true" focusable="false" />
                 Record expense
               </button>
             )}
-            {cashier && onSale && (
+            {cashier && canRecord && onSale && (
               <button className="button secondary" onClick={onSale}>
-                <Wallet size={18} aria-hidden="true" />
+                <Wallet size={18} aria-hidden="true" focusable="false" />
                 Record sale
               </button>
             )}
             <span className="role-access-tag">
-              <ShieldCheck size={14} aria-hidden="true" />
+              <ShieldCheck size={14} aria-hidden="true" focusable="false" />
               {admin
                 ? "System administration"
                 : auditor
@@ -353,12 +442,12 @@ export default function RoleDashboard({
       <div className="role-dashboard-meta">
         <span>
           {demo
-            ? "Demonstration workspace"
+            ? `Demonstration workspace · ${admin ? "Staff access overview" : scopeDescription}`
             : admin
               ? "Staff access overview"
               : cashier
-                ? "Your recorded activity"
-                : "Selected account and date scope"}
+                ? `Your activity · ${scopeDescription}`
+                : scopeDescription}
         </span>
         <span>
           {lastUpdated
@@ -366,23 +455,79 @@ export default function RoleDashboard({
             : "Refresh to load the latest records"}
         </span>
       </div>
-      <div className="reference-metrics role-metrics">
-        {metrics.map(({ title, value, icon: Icon, tone, note }) => (
-          <section
-            className={`reference-metric effect-card tone-${tone}`}
-            key={title}
-          >
-            <span className="metric-icon">
-              <Icon size={26} aria-hidden="true" />
-            </span>
-            <div className="metric-copy">
-              <h2>{title}</h2>
-              <strong>{value}</strong>
-              <span className="metric-note">{note}</span>
-            </div>
-          </section>
-        ))}
+      <div
+        className="reference-metrics role-metrics role-metrics-primary"
+        aria-label="Key figures"
+      >
+        {metrics.slice(0, 4).map(renderMetric)}
       </div>
+      <section className="reference-panel role-tools">
+        <header>
+          <div className="reference-panel-title">
+            <SystemIcon
+              icon={Activity}
+              tone={accent}
+              className="role-panel-icon"
+              size={23}
+            />
+            <div>
+              <h2>
+                {admin
+                  ? "Administration tools"
+                  : auditor
+                    ? "Review tools"
+                    : "Your work queue"}
+              </h2>
+              <p>
+                {admin
+                  ? "Keep access and organisation records in order."
+                  : auditor
+                    ? "Follow the evidence behind each recorded decision."
+                    : "Continue with the tools assigned to your role."}
+              </p>
+            </div>
+          </div>
+        </header>
+        <div className="role-task-grid">
+          {workspace.tasks.map((task) => {
+            const { icon: Icon, tone } = destinations[task.page] || {
+              icon: FileText,
+              tone: "teal",
+            };
+            return (
+              <button
+                className={`role-task tone-${tone}`}
+                key={task.page}
+                onClick={() => onNavigate(task.page)}
+              >
+                <SystemIcon
+                  icon={Icon}
+                  tone={tone}
+                  variant="shortcut"
+                  className="role-task-icon"
+                  size={24}
+                />
+                <strong>{task.title}</strong>
+                <span className="role-task-description">
+                  {task.description}
+                </span>
+                <span className="role-task-open">
+                  Open workspace
+                  <ArrowRight size={16} aria-hidden="true" focusable="false" />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+      {metrics.length > 4 && (
+        <details className="role-more-figures">
+          <summary>More figures ({metrics.length - 4})</summary>
+          <div className="reference-metrics role-metrics">
+            {metrics.slice(4).map(renderMetric)}
+          </div>
+        </details>
+      )}
       {!admin && (
         <p className="panel-note">
           Daily figures use {daily.date || "today"} in Africa/Freetown and the
@@ -390,11 +535,60 @@ export default function RoleDashboard({
           receipts, not added again.
         </p>
       )}
+      {user.role === "finance" && (
+        <div className="role-dashboard-grid">
+          <section className="reference-panel">
+            <h2>Income and expense trends</h2>
+            <FinancialChart trend={overview.trend || []} money={money} />
+            <button
+              className="button secondary small"
+              onClick={() => onNavigate("Reports")}
+            >
+              Open financial reports
+            </button>
+          </section>
+          <section className="reference-panel">
+            <h2>Current account balances</h2>
+            <dl className="settings-grid">
+              {["cash", "bank", "mobile"].map((channel) => (
+                <div key={channel}>
+                  <dt>
+                    {channel === "mobile"
+                      ? "Mobile money"
+                      : channel === "bank"
+                        ? "Bank"
+                        : "Cash"}
+                  </dt>
+                  <dd>
+                    SLE{" "}
+                    {money(
+                      (overview.accounts || [])
+                        .filter((a: Row) => a.channel === channel)
+                        .reduce(
+                          (sum: bigint, a: Row) =>
+                            sum + BigInt(a.closing || "0"),
+                          0n,
+                        )
+                        .toString(),
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <button
+              className="button secondary small"
+              onClick={() => onNavigate("Accounts")}
+            >
+              Review account balances
+            </button>
+          </section>
+        </div>
+      )}
       {admin && overview.role_distribution && (
         <section className="reference-panel">
           <header>
             <div className="reference-panel-title">
-              <Users size={24} />
+              <Users size={24} aria-hidden="true" focusable="false" />
               <div>
                 <h2>Role distribution and configuration</h2>
                 <p>Registered staff by assigned role.</p>
@@ -412,8 +606,11 @@ export default function RoleDashboard({
             ))}
           </dl>
           <p className="panel-note">
-            {overview.configuration?.active_accounts} active account references
-            / {overview.configuration?.active_categories} active categories.
+            Last successful backup:{" "}
+            {overview.last_successful_backup || "Not recorded"}.{" "}
+            {overview.backup_health}. {overview.configuration?.active_accounts}{" "}
+            active account references /{" "}
+            {overview.configuration?.active_categories} active categories.
             Currency: {overview.configuration?.currency}. Imports: CSV and XLSX.
             Auditor exports:{" "}
             {overview.configuration?.auditor_export_allowed
@@ -421,6 +618,39 @@ export default function RoleDashboard({
               : "disabled"}
             .
           </p>
+        </section>
+      )}
+      {admin && (
+        <section className="reference-panel">
+          <h2>Recent security events</h2>
+          {overview.security_events?.length ? (
+            <ul className="role-activity">
+              {overview.security_events.map((event: Row) => (
+                <li key={event.id}>
+                  <div className="role-event-copy">
+                    <strong>{auditActionLabel(event.action)}</strong>
+                    <details className="audit-event-code">
+                      <summary>Event code</summary>
+                      <code>{event.action}</code>
+                    </details>
+                    <span>
+                      {event.user_name || "System"} · {event.created_at} UTC
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="panel-note">
+              No account-access or credential changes recorded.
+            </p>
+          )}
+          <button
+            className="button secondary small"
+            onClick={() => onNavigate("Audit trail")}
+          >
+            Review access history
+          </button>
         </section>
       )}
       {!admin && !cashier && (
@@ -444,9 +674,17 @@ export default function RoleDashboard({
                         {auditor ? `${r.kind}: ${r.status}` : r.filename}
                       </strong>
                       <span>
-                        {auditor
-                          ? `${r.reviewer}: ${r.reason}`
-                          : `${r.status} / ${r.created_at}`}
+                        {auditor ? (
+                          <>
+                            <UserIdentity
+                              name={r.reviewer}
+                              src={r.reviewer_image_url}
+                            />
+                            : {r.reason}
+                          </>
+                        ) : (
+                          `${r.status} / ${r.created_at}`
+                        )}
                       </span>
                     </div>
                   </li>
@@ -472,9 +710,17 @@ export default function RoleDashboard({
                   {overview.recent_audit.map((r: Row) => (
                     <li key={r.id}>
                       <div className="role-event-copy">
-                        <strong>{r.action.replaceAll(".", " / ")}</strong>
+                        <strong>{auditActionLabel(r.action)}</strong>
+                        <details className="audit-event-code">
+                          <summary>Event code</summary>
+                          <code>{r.action}</code>
+                        </details>
                         <span>
-                          {r.user_name || "System"} / {r.created_at}
+                          <UserIdentity
+                            name={r.user_name}
+                            src={r.user_image_url}
+                          />{" "}
+                          / {r.created_at}
                         </span>
                       </div>
                     </li>
@@ -508,64 +754,17 @@ export default function RoleDashboard({
           </section>
         </div>
       )}
-      <div className="role-dashboard-grid">
-        <section className="reference-panel role-tools">
-          <header>
-            <div className="reference-panel-title">
-              <span className="role-panel-icon tone-cyan">
-                <Activity size={23} aria-hidden="true" />
-              </span>
-              <div>
-                <h2>
-                  {admin
-                    ? "Administration tools"
-                    : auditor
-                      ? "Review tools"
-                      : "Your work queue"}
-                </h2>
-                <p>
-                  {admin
-                    ? "Keep access and organisation records in order."
-                    : auditor
-                      ? "Follow the evidence behind each recorded decision."
-                      : "Continue with the tools assigned to your role."}
-                </p>
-              </div>
-            </div>
-          </header>
-          <div className="role-task-grid">
-            {workspace.tasks.map((task) => {
-              const { icon: Icon, tone } = destinations[task.page] || {
-                icon: FileText,
-                tone: "teal",
-              };
-              return (
-                <button
-                  className={`role-task tone-${tone}`}
-                  key={task.page}
-                  onClick={() => onNavigate(task.page)}
-                >
-                  <span className="role-task-icon">
-                    <Icon size={24} aria-hidden="true" />
-                  </span>
-                  <strong>{task.title}</strong>
-                  <span className="role-task-description">
-                    {task.description}
-                  </span>
-                  <span className="role-task-open">
-                    Open workspace
-                    <ArrowRight size={16} aria-hidden="true" />
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      <div className="role-recent-records">
         <section className="reference-panel role-records">
           <header>
             <div className="reference-panel-title">
               <span className="role-panel-icon tone-slate">
-                <History size={23} aria-hidden="true" />
+                <History
+                  size={23}
+                  aria-hidden="true"
+                  focusable="false"
+                  className="icon-history"
+                />
               </span>
               <div>
                 <h2>
@@ -593,25 +792,47 @@ export default function RoleDashboard({
                     className={`role-event-icon tone-${admin ? "slate" : entry.direction === "out" ? "orange" : "green"}`}
                   >
                     {admin ? (
-                      <ShieldCheck size={18} aria-hidden="true" />
+                      <ShieldCheck
+                        size={18}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     ) : entry.direction === "out" ? (
-                      <ArrowRight size={18} aria-hidden="true" />
+                      <ArrowRight
+                        size={18}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     ) : (
-                      <ArrowDownLeft size={18} aria-hidden="true" />
+                      <ArrowDownLeft
+                        size={18}
+                        aria-hidden="true"
+                        focusable="false"
+                      />
                     )}
                   </span>
                   <div className="role-event-copy">
                     <strong>
                       {admin
-                        ? eventNames[entry.action] ||
-                          entry.action
-                            .replaceAll(".", " / ")
-                            .replaceAll("_", " ")
+                        ? auditActionLabel(entry.action)
                         : entry.reference || entry.description}
                     </strong>
                     <span>
-                      {admin ? entry.user_name || "System" : entry.date}
+                      {admin ? (
+                        <UserIdentity
+                          name={entry.user_name}
+                          src={entry.user_image_url}
+                        />
+                      ) : (
+                        entry.date
+                      )}
                     </span>
+                    {admin && (
+                      <details className="audit-event-code">
+                        <summary>Event code</summary>
+                        <code>{entry.action}</code>
+                      </details>
+                    )}
                     {admin ? (
                       <time>
                         {new Date(
@@ -643,7 +864,7 @@ export default function RoleDashboard({
           ) : (
             <div className="role-empty">
               <span>
-                <Search size={30} aria-hidden="true" />
+                <Search size={30} aria-hidden="true" focusable="false" />
               </span>
               <h3>
                 {admin ? "No system activity yet" : "No records in this view"}
@@ -660,7 +881,7 @@ export default function RoleDashboard({
             onClick={() => onNavigate(admin ? "Audit trail" : "Transactions")}
           >
             {admin ? "View system activity" : "View transactions"}
-            <ArrowRight size={16} aria-hidden="true" />
+            <ArrowRight size={16} aria-hidden="true" focusable="false" />
           </button>
         </section>
       </div>

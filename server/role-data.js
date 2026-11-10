@@ -1,3 +1,4 @@
+import { staffImageSql } from "./profile-images.js";
 export function businessDate() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Freetown",
@@ -10,7 +11,7 @@ export function approvalHistory(db, req) {
   const scoped = new Set(req.rows.map((r) => r.id));
   let rows = db
     .prepare(
-      `SELECT a.id,'payment' AS kind,a.transaction_id AS reference,a.decision AS status,a.reason,a.created_at AS decided_at,u.name AS reviewer,t.user_id AS requester_id,t.date,t.account_id,t.description,t.amount FROM approvals a JOIN transactions t ON t.id=a.transaction_id JOIN users u ON u.id=a.user_id ORDER BY a.created_at DESC`,
+      `SELECT a.id,'payment' AS kind,a.transaction_id AS reference,a.decision AS status,a.reason,a.created_at AS decided_at,u.name AS reviewer,${staffImageSql("u.id")} AS reviewer_image_url,t.user_id AS requester_id,t.date,t.account_id,t.description,t.amount FROM approvals a JOIN transactions t ON t.id=a.transaction_id JOIN users u ON u.id=a.user_id ORDER BY a.created_at DESC`,
     )
     .all()
     .filter((r) => scoped.has(r.reference));
@@ -22,7 +23,7 @@ export function approvalHistory(db, req) {
     ]) {
       const entries = db
         .prepare(
-          `SELECT c.*,u.name AS reviewer FROM ${table} c LEFT JOIN users u ON u.id=c.decision_user WHERE c.status IN ('approved','rejected','undone') ORDER BY c.decided_at DESC`,
+          `SELECT c.*,u.name AS reviewer,${staffImageSql("u.id")} AS reviewer_image_url FROM ${table} c LEFT JOIN users u ON u.id=c.decision_user WHERE c.status IN ('approved','rejected','undone') ORDER BY c.decided_at DESC`,
         )
         .all();
       for (const r of entries) {
@@ -52,6 +53,7 @@ export function approvalHistory(db, req) {
           reason: r.decision_reason,
           decided_at: r.decided_at,
           reviewer: r.reviewer,
+          reviewer_image_url: r.reviewer_image_url,
           requester_id: r.user_id,
           date,
           description: r.reason,

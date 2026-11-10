@@ -1,3 +1,4 @@
+import { staffImageSql } from "./profile-images.js";
 import { rateLimit } from "express-rate-limit";
 import { randomBytes } from "node:crypto";
 import { atomic, audit, hashPassword, verifyPassword, isoDate } from "./db.js";
@@ -5,8 +6,9 @@ import { documentRows, fail } from "./enhancements.js";
 import { hasApprovalAuthority } from "./access.js";
 
 const adminActions =
-  "(e.action LIKE 'auth.%' OR e.action LIKE 'user.%' OR e.action LIKE 'system.%' OR e.action IN ('settings.update','backup.export','approval.delegate','account.create','account.update','category.create','category.update'))";
+  "(e.action LIKE 'auth.%' OR e.action LIKE 'user.%' OR e.action LIKE 'system.%' OR e.action LIKE 'backup.%' OR e.action IN ('settings.update','approval.delegate','account.create','account.update','category.create','category.update'))";
 import { approvalHistory } from "./role-data.js";
+import { operationalReminders } from "./business-operations.js";
 export function registerRoleFeatures(
   app,
   db,
@@ -35,7 +37,7 @@ export function registerRoleFeatures(
     res.json(
       db
         .prepare(
-          `SELECT u.id,u.name,u.email,u.role,u.active,(SELECT MIN(e.created_at) FROM audit_events e WHERE e.action='user.create' AND e.entity=u.id) AS registered_at,(SELECT MAX(e.created_at) FROM audit_events e WHERE e.action='auth.login' AND e.user_id=u.id) AS last_login_at FROM users u WHERE ${where.join(" AND ")} ORDER BY u.name`,
+          `SELECT u.id,u.name,u.email,u.role,u.active,${staffImageSql("u.id")} AS image_url,(SELECT MIN(e.created_at) FROM audit_events e WHERE e.action='user.create' AND e.entity=u.id) AS registered_at,(SELECT MAX(e.created_at) FROM audit_events e WHERE e.action='auth.login' AND e.user_id=u.id) AS last_login_at FROM users u WHERE ${where.join(" AND ")} ORDER BY u.name`,
         )
         .all(...values),
     );
@@ -165,7 +167,7 @@ export function registerRoleFeatures(
       res.json(
         db
           .prepare(
-            `SELECT e.*,u.name AS user_name FROM audit_events e LEFT JOIN users u ON u.id=e.user_id WHERE ${where.join(" AND ")} ORDER BY e.created_at DESC,e.rowid DESC LIMIT 200`,
+            `SELECT e.*,u.name AS user_name,${staffImageSql("u.id")} AS user_image_url FROM audit_events e LEFT JOIN users u ON u.id=e.user_id WHERE ${where.join(" AND ")} ORDER BY e.created_at DESC,e.rowid DESC LIMIT 200`,
           )
           .all(...values)
           .map((event) => {
@@ -322,6 +324,9 @@ export function registerRoleFeatures(
           "SELECT id,action AS title,created_at,'Recorded audit event' AS detail,'Audit trail' AS page FROM audit_events ORDER BY rowid DESC LIMIT 8",
         )
         .all();
-    res.json({ items, can_approve: hasApprovalAuthority(db, req.user) });
+    res.json({
+      items: [...operationalReminders(db, req.user), ...items],
+      can_approve: hasApprovalAuthority(db, req.user),
+    });
   });
 }

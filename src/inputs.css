@@ -7,9 +7,9 @@
   width: 100%;
   min-width: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-field);
   background: var(--surface-soft);
-  box-shadow: 0 2px 4px color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--ink) 6%, transparent);
   transition:
     background-color 0.3s ease,
     box-shadow 0.3s ease;
@@ -34,7 +34,7 @@
   min-height: 46px;
   padding: 0.6em 1em;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-field);
   background: transparent;
   color: var(--ink);
   font-family: var(--font-ui);
@@ -88,7 +88,7 @@
   min-height: 48px;
   padding: 0 14px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-field);
 }
 .auth-input.input-container:focus-within {
   background: white;
@@ -136,11 +136,11 @@
 }
 .input::file-selector-button {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 6px 10px;
   margin-right: 10px;
   color: var(--primary);
-  background: white;
+  background: var(--surface-raised);
   cursor: pointer;
   font: inherit;
   font-size: var(--text-small);

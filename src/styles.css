@@ -4,7 +4,7 @@
   justify-content: space-between;
   gap: 25px;
   border: 1px solid var(--line);
-  background: linear-gradient(135deg, #e8f6f4aa, white 70%);
+  background: linear-gradient(135deg, rgba(240,253,250,0.70), var(--surface-raised) 70%);
   padding: 24px;
   margin-bottom: 24px;
   border-radius: var(--card-radius);
@@ -24,24 +24,22 @@
   .company-start {
     flex-direction: column;
     align-items: flex-start;
-  }
-  .company-start {
     padding: 20px;
     gap: 15px;
   }
 }
-:root {
+html {
   font-family: var(--font-ui);
   color: var(--ink);
   background: var(--surface-canvas);
   font-synthesis: none;
   font-size: 100%;
   line-height: 1.55;
-  --font-ui:
-    "Plus Jakarta Sans Variable", "Plus Jakarta Sans", Arial, sans-serif;
-  --sidebar-width: 264px;
+  text-size-adjust: 100%;
 }
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 .card-title-group {
@@ -78,7 +76,7 @@
   line-height: 1.4;
 }
 .balance .stat-icon {
-  background: linear-gradient(#172554a6, #172554a6), var(--brand-gradient);
+  background: linear-gradient(rgba(19,78,74,0.65), rgba(19,78,74,0.65)), var(--brand-gradient);
   color: white;
 }
 .panel-header > .button {
@@ -392,22 +390,17 @@ strong {
   min-height: 48px;
 }
 .nav-item:hover {
-  background: var(--line);
+  background: var(--surface-tint);
+  color: var(--primary);
 }
 .nav-item.active {
   background: var(--primary-soft);
   color: var(--primary-hover);
   font-weight: 650;
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 .nav-item.active:before {
-  content: "";
-  width: 3px;
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  background: var(--primary);
-  border-radius: 0 4px 4px 0;
+  display: none; /* Replaced by box-shadow indicator in design.css */
 }
 .nav-count {
   margin-left: auto;
@@ -478,7 +471,7 @@ main {
 }
 .topbar {
   height: 72px;
-  background: #fffffff2;
+  background: rgba(255,255,255,0.95);
   border-bottom: 1px solid var(--line);
   padding: 0 36px;
   display: flex;
@@ -688,16 +681,16 @@ main {
   flex-shrink: 0;
 }
 .green {
-  background: #e7f9f8;
-  color: var(--teal);
+  background: var(--success-soft);
+  color: var(--success);
 }
 .amber {
-  background: #faf3e5;
-  color: #c3a268;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 .blue {
-  background: #edf2f3;
-  color: #87a4ac;
+  background: var(--info-soft);
+  color: var(--info);
 }
 .dot {
   height: 5px;
@@ -706,16 +699,16 @@ main {
   display: block;
 }
 .green-dot {
-  background: var(--teal);
+  background: var(--success);
 }
 .amber-dot {
-  background: #c8a96b;
+  background: var(--warning);
 }
 .mini-tag {
-  color: #b39c66;
-  background: #fbf6e9;
-  border: 1px solid #f2ebd6;
-  border-radius: 4px;
+  color: var(--warning-text);
+  background: var(--warning-soft);
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-xs);
   padding: 2px 4px;
   margin-right: 3px;
   font-size: var(--text-small);
@@ -835,17 +828,17 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--line);
+  background: var(--surface-soft);
   color: var(--muted);
   flex-shrink: 0;
 }
 .account-icon.mobile {
-  background: #faf0e4;
-  color: #c09961;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 .account-icon.bank {
-  background: #edf2f6;
-  color: #8ba0b5;
+  background: var(--info-soft);
+  color: var(--info);
 }
 .account-row strong {
   font-size: var(--text-ui);
@@ -969,7 +962,7 @@ td {
   padding: 17px 20px;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
-  color: #40516b;
+  color: var(--ink);
 }
 tbody tr:last-child td {
   border-bottom: 0;
@@ -1018,12 +1011,12 @@ tbody tr:hover {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  background: #f6f2e8;
-  color: #bcaa82;
+  background: var(--surface-soft);
+  color: var(--muted);
 }
 .transaction-symbol.in {
-  background: #e7f9f8;
-  color: var(--teal);
+  background: var(--success-soft);
+  color: var(--success);
 }
 .badge {
   display: inline-flex;
@@ -1031,40 +1024,45 @@ tbody tr:hover {
   white-space: nowrap;
   text-transform: capitalize;
   border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 4px 7px;
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
   font-size: var(--text-small);
   background: var(--primary-soft);
   color: var(--primary-hover);
   line-height: 1.2;
+  font-weight: 550;
 }
 .badge.reconciled,
 .badge.approved,
 .badge.paid,
 .badge.committed,
-.badge.active {
+.badge.active,
+.badge.verified {
   background: var(--success-soft);
-  border-color: #bbdfc8;
-  color: var(--success);
+  border-color: #BBF7D0;
+  color: var(--success-text);
 }
 .badge.pending,
 .badge.suggested,
 .badge.partial,
 .badge.preview,
-.badge.independent_review {
-  background: #fcf6e7;
-  border-color: #f1e7c9;
-  color: #8a6215;
+.badge.independent_review,
+.badge.submitted,
+.badge.running {
+  background: var(--warning-soft);
+  border-color: #FDE68A;
+  color: var(--warning-text);
 }
 .badge.rejected,
 .badge.duplicate,
 .badge.overdue,
 .badge.closed,
 .badge.inactive,
-.badge.ambiguous {
-  background: #fbefeb;
-  border-color: #f1ded6;
-  color: #a4483c;
+.badge.ambiguous,
+.badge.failed {
+  background: var(--danger-soft);
+  border-color: #FECACA;
+  color: var(--danger-text);
 }
 .amount {
   font-family: var(--font-ui);
@@ -1074,7 +1072,7 @@ tbody tr:hover {
   font-variant-numeric: tabular-nums;
 }
 .amount.positive {
-  color: var(--teal);
+  color: var(--success);
 }
 .amount small {
   font-size: var(--text-small);
@@ -1292,13 +1290,14 @@ tbody tr:hover {
   font-size: var(--text-small);
 }
 .import-errors {
-  background: #fdf3eb;
+  background: var(--warning-soft);
   margin: 0 22px 20px;
   padding: 12px;
-  border-radius: 6px;
-  color: #ac835f;
+  border-radius: var(--radius-sm);
+  color: var(--warning-text);
   font-size: var(--text-body);
   line-height: 1.65;
+  border: 1px solid #FDE68A;
 }
 .recon-summary {
   display: grid;
@@ -1363,9 +1362,9 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 20px;
-  background: var(--line);
-  border: 1px solid var(--surface-tint);
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(240,253,250,0.70), var(--surface-raised) 55%);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
   padding: 25px;
   margin-bottom: 25px;
 }
@@ -1374,7 +1373,7 @@ tbody tr:hover {
   place-items: center;
   width: 64px;
   height: 64px;
-  color: var(--muted);
+  color: var(--primary);
   background: var(--surface-tint);
   border-radius: 13px;
   flex-shrink: 0;
@@ -1425,15 +1424,16 @@ tbody tr:hover {
 .analytics-note {
   display: flex;
   gap: 17px;
-  background: var(--line);
+  background: linear-gradient(135deg, rgba(240,253,250,0.80), var(--surface-raised) 55%);
+  border: 1px solid var(--line);
   padding: 23px;
-  border-radius: 9px;
+  border-radius: var(--card-radius);
   margin-bottom: 28px;
   color: var(--muted);
 }
 .analytics-note h3 {
   font-size: var(--text-body);
-  color: var(--muted);
+  color: var(--ink);
 }
 .analytics-note p {
   font-size: var(--text-body);
@@ -1492,7 +1492,7 @@ pre {
 .overlay {
   position: fixed;
   inset: 0;
-  background: #0b182699;
+  background: rgba(15,23,42,0.60);
   backdrop-filter: blur(8px);
   z-index: 100;
   display: flex;
@@ -1505,11 +1505,11 @@ pre {
   max-width: 100%;
   max-height: 90vh;
   overflow: auto;
-  background: #fff;
-  border-radius: var(--radius-xl, 20px);
+  background: var(--surface-raised);
+  border-radius: var(--radius-xl);
   padding: 28px;
-  box-shadow: var(--overlay-shadow, 0 24px 64px #12263a28);
-  border: 1px solid #ffffffcc;
+  box-shadow: var(--overlay-shadow);
+  border: 1px solid rgba(255,255,255,0.80);
 }
 .modal-head {
   display: flex;
@@ -1559,10 +1559,10 @@ pre {
   overflow-wrap: anywhere;
 }
 .error {
-  background: #fdf0ec;
-  border: 1px solid #efdbd1;
-  border-radius: 7px;
-  color: #b17c64;
+  background: var(--danger-soft);
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-sm);
+  color: var(--danger-text);
   padding: 13px 15px;
   margin-bottom: 20px;
   font-size: var(--text-body);
@@ -1909,7 +1909,7 @@ pre {
     display: block;
     position: fixed;
     inset: 0;
-    background: #17255466;
+    background: rgba(15,23,42,0.45);
     border: 0;
     z-index: 25;
   }

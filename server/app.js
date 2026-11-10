@@ -34,6 +34,23 @@ import {
 
 import { roleBoundary, hasApprovalAuthority } from "./access.js";
 import { registerRoleFeatures } from "./role-features.js";
+import {
+  effectivePermissions,
+  permittedPages,
+  hasPermission,
+  assertApprovalLimit,
+} from "./permissions.js";
+import { registerWorkspaceFeatures } from "./workspace-features.js";
+import {
+  registerBusinessOperations,
+  linkShiftReceipt,
+} from "./business-operations.js";
+import { registerMfa, verifySecondFactor } from "./mfa.js";
+import {
+  imageUrl,
+  registerProfileImages,
+  staffImageSql,
+} from "./profile-images.js";
 
 const financial = ["manager", "finance"];
 const readers = ["manager", "finance", "auditor", "admin"];
@@ -115,7 +132,7 @@ function filters(req) {
     fail("From date cannot follow To date.");
   return { where: conditions.join(" AND "), values };
 }
-const txSelect = `SELECT t.*,COALESCE((SELECT json_extract(e.details,'$.entry_kind') FROM audit_events e WHERE e.entity=t.id AND e.action='transaction.create' ORDER BY e.rowid LIMIT 1),CASE WHEN t.direction='out' THEN 'payment' ELSE 'receipt' END) AS entry_kind,COALESCE((SELECT SUM(p.amount) FROM partial_matches p WHERE p.transaction_id=t.id AND p.status='approved'),0) AS reconciled_minor,a.name AS account_name,a.channel,a.currency,c.name AS contact_name,u.name AS user_name,CASE WHEN v.transaction_id IS NULL THEN 'recorded' ELSE 'evidence_verified' END AS payment_status FROM transactions t JOIN accounts a ON a.id=t.account_id LEFT JOIN contacts c ON c.id=t.contact_id JOIN users u ON u.id=t.user_id LEFT JOIN payment_verifications v ON v.transaction_id=t.id`;
+const txSelect = `SELECT t.*,COALESCE((SELECT json_extract(e.details,'$.entry_kind') FROM audit_events e WHERE e.entity=t.id AND e.action='transaction.create' ORDER BY e.rowid LIMIT 1),CASE WHEN t.direction='out' THEN 'payment' ELSE 'receipt' END) AS entry_kind,COALESCE((SELECT SUM(p.amount) FROM partial_matches p WHERE p.transaction_id=t.id AND p.status='approved'),0) AS reconciled_minor,a.name AS account_name,a.channel,a.currency,c.name AS contact_name,u.name AS user_name,${staffImageSql("u.id")} AS user_image_url,CASE WHEN v.transaction_id IS NULL THEN 'recorded' ELSE 'evidence_verified' END AS payment_status FROM transactions t JOIN accounts a ON a.id=t.account_id LEFT JOIN contacts c ON c.id=t.contact_id JOIN users u ON u.id=t.user_id LEFT JOIN payment_verifications v ON v.transaction_id=t.id`;
 
 export function createApp(db) {
   const app = express();
@@ -164,6 +181,7 @@ export function createApp(db) {
           )
           .get(session.user_id)
       : null;
+    if (req.user) req.user.image_url = imageUrl(db, req.user.id);
     if (
       !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
       req.headers["x-csrf-token"] !== session.csrf
@@ -300,6 +318,7 @@ export function createApp(db) {
       const raw = randomBytes(32).toString("hex"),
         csrf = randomBytes(32).toString("hex");
       atomic(db, () => {
+        verifySecondFactor(db, user.id, req.body.code);
         db.prepare("DELETE FROM sessions WHERE token=?").run(req.session.token);
         db.prepare("INSERT INTO sessions VALUES (?,?,?,?)").run(
           digest(raw),
@@ -322,6 +341,7 @@ export function createApp(db) {
           name: user.name,
           email: user.email,
           role: user.role,
+          image_url: imageUrl(db, user.id),
         },
         csrf,
       });
@@ -332,6 +352,7 @@ export function createApp(db) {
     res.clearCookie("finbiz_session", { path: "/" });
     res.json({ ok: true });
   });
+  registerProfileImages(app, db, allow);
   app.patch("/api/profile", allow(), (req, res) => {
     if (Object.keys(req.body).some((key) => key !== "name"))
       fail("Only your display name can be updated here.");
@@ -398,33 +419,24 @@ export function createApp(db) {
               .all()
           : db.prepare("SELECT * FROM categories ORDER BY name").all(),
       permissions: {
-        can_approve: hasApprovalAuthority(db, req.user),
-        can_record: ["manager", "finance", "cashier"].includes(req.user.role),
-        can_manage_finances: financial.includes(req.user.role),
-        can_manage_users: admin,
-        can_export:
-          financial.includes(req.user.role) ||
-          (req.user.role === "auditor" &&
-            !!db
-              .prepare(
-                "SELECT auditor_export_allowed AS allowed FROM settings WHERE id=1",
-              )
-              .get().allowed),
-        can_create_customers:
-          financial.includes(req.user.role) ||
-          (cashier &&
-            !!db
-              .prepare(
-                "SELECT cashier_create_customers AS allowed FROM settings WHERE id=1",
-              )
-              .get().allowed),
+        grants: effectivePermissions(db, req.user),
+        pages: permittedPages(db, req.user),
+        can_approve:
+          hasApprovalAuthority(db, req.user) &&
+          hasPermission(db, req.user, "finance.expense.approve"),
+        can_record: hasPermission(db, req.user, "finance.transaction.create"),
+        can_manage_finances:
+          hasPermission(db, req.user, "finance.transaction.create") &&
+          financial.includes(req.user.role),
+        can_manage_users: hasPermission(db, req.user, "users.staff.create"),
+        can_export: hasPermission(db, req.user, "reports.financial.export"),
+        can_create_customers: hasPermission(
+          db,
+          req.user,
+          "finance.contact.create",
+        ),
         can_allocate_receipts:
-          cashier &&
-          !!db
-            .prepare(
-              "SELECT cashier_invoice_allocation AS allowed FROM settings WHERE id=1",
-            )
-            .get().allowed,
+          cashier && hasPermission(db, req.user, "sales.receipt.allocate"),
         transaction_scope: cashier ? "own" : admin ? "none" : "company",
       },
     });
@@ -647,6 +659,8 @@ export function createApp(db) {
           account: a.id,
           approval,
         });
+        if (req.user.role === "cashier" && a.channel === "cash")
+          linkShiftReceipt(db, txid, req.user.id, a.id);
         return txid;
       });
       const duplicates = reference
@@ -695,6 +709,24 @@ export function createApp(db) {
       .get();
     res.json({
       ...counts,
+      last_successful_backup:
+        db
+          .prepare(
+            "SELECT created_at FROM audit_events WHERE action IN ('backup.created','backup.encrypted_verified') ORDER BY rowid DESC LIMIT 1",
+          )
+          .get()?.created_at || null,
+      backup_health: db
+        .prepare(
+          "SELECT 1 FROM audit_events WHERE action IN ('backup.created','backup.encrypted_verified') LIMIT 1",
+        )
+        .get()
+        ? "Snapshot recorded; verify retained copy"
+        : "No verified snapshot recorded",
+      security_events: db
+        .prepare(
+          "SELECT e.id,e.action,e.created_at,u.name AS user_name FROM audit_events e LEFT JOIN users u ON u.id=e.user_id WHERE e.action IN ('auth.password','user.password_reset','user.update','system.session_revoked','system.access_role_updated','user.access_role') ORDER BY e.rowid DESC LIMIT 8",
+        )
+        .all(),
       role_distribution: db
         .prepare(
           "SELECT role,COUNT(*) AS total,SUM(active) AS active FROM users GROUP BY role ORDER BY role",
@@ -721,7 +753,7 @@ export function createApp(db) {
         .get(Date.now()).n,
       recent_activity: db
         .prepare(
-          "SELECT e.id,e.action,e.created_at,u.name AS user_name FROM audit_events e LEFT JOIN users u ON u.id=e.user_id WHERE e.action LIKE 'auth.%' OR e.action LIKE 'user.%' OR e.action LIKE 'system.%' OR e.action IN ('settings.update','backup.export','approval.delegate','account.create','account.update','category.create','category.update') ORDER BY e.created_at DESC,e.rowid DESC LIMIT 8",
+          `SELECT e.id,e.action,e.created_at,u.name AS user_name,${staffImageSql("u.id")} AS user_image_url FROM audit_events e LEFT JOIN users u ON u.id=e.user_id WHERE e.action LIKE 'auth.%' OR e.action LIKE 'user.%' OR e.action LIKE 'system.%' OR e.action LIKE 'backup.%' OR e.action IN ('settings.update','approval.delegate','account.create','account.update','category.create','category.update') ORDER BY e.created_at DESC,e.rowid DESC LIMIT 8`,
         )
         .all(),
     });
@@ -825,6 +857,10 @@ export function createApp(db) {
           fail("A different manager must approve your entry.", 403);
         if (t.approval !== "pending")
           fail("This entry has already been decided.", 409);
+        if (decision === "approved")
+          assertApprovalLimit(db, req.user, t.amount);
+        if (!hasPermission(db, req.user, "finance.expense.approve"))
+          fail("Expense approval is not permitted by your role.", 403);
         db.prepare(
           "INSERT INTO approvals (id,transaction_id,decision,reason,user_id) VALUES (?,?,?,?,?)",
         ).run(id(), t.id, decision, reason, req.user.id);
@@ -1447,6 +1483,10 @@ export function createApp(db) {
         db.prepare(
           "UPDATE approval_delegates SET active=0 WHERE user_id=?",
         ).run(current.id);
+      if (next.role !== current.role)
+        db.prepare("DELETE FROM user_access_roles WHERE user_id=?").run(
+          current.id,
+        );
       audit(db, req.user.id, "user.update", current.id, {
         before: current,
         after: next,
@@ -1458,6 +1498,9 @@ export function createApp(db) {
       res.json({ ok: true });
     }),
   );
+  registerWorkspaceFeatures(app, db, { report, text });
+  registerBusinessOperations(app, db, { text });
+  registerMfa(app, db);
   registerEnhancements(app, db, {
     allow,
     financial,
