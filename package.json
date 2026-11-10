@@ -7,6 +7,9 @@
     "node": ">=22.16.0"
   },
   "scripts": {
+    "doctor": "node scripts/check-environment.mjs",
+    "setup": "node scripts/check-environment.mjs --runtime-only && npm ci && npm run build",
+    "prestart": "node scripts/check-environment.mjs --require-build",
     "dev": "concurrently -k -n api,web \"node --watch server/index.js\" \"vite --host 127.0.0.1\"",
     "dev:demo": "concurrently -k -n api,web \"node --watch server/index.js --demo\" \"vite --host 127.0.0.1\"",
     "build": "tsc --noEmit && vite build",
